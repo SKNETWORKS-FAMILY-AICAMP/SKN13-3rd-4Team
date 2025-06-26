@@ -9,7 +9,7 @@ from langchain.agents import create_tool_calling_agent, AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage, AIMessage
 from core.response_styler import ResponseStyler
-
+from openai import OpenAI
 from dotenv import load_dotenv
 
 from .langchain_tools import get_all_tools
@@ -144,6 +144,25 @@ class ToolCallingAgentProcessor:
     
     def process_query(self, query: str, user_id: Optional[str] = None, 
                      session_id: Optional[str] = None) -> Dict[str, Any]:
+        # 인사 감지
+        if self._is_greeting(query):
+            return {
+                "response": "안녕하세요! 무엇을 도와드릴까요? 😊",
+                "method": "greeting",
+                "response_time": 0.1,
+                "tools_used": ["general_response"],
+                "success": True
+            }
+
+        # 의미 없는 질문 감지
+        if not self._is_informative_query(query):
+            return {
+                "response": "앗, 아직 질문을 못 알아들었어요 😅 다시 한번 말씀해 주세요!",
+                "method": "general",
+                "response_time": 0.1,
+                "tools_used": [],
+                "success": True
+            }
         """
         쿼리 처리 메인 함수
         
@@ -517,7 +536,36 @@ class ToolCallingAgentProcessor:
         # 대화 기록이 너무 길어지면 오래된 것부터 제거 (최근 10개 대화만 유지)
         if len(self.chat_history) > 20:
             self.chat_history = self.chat_history[-20:]
+    def _is_informative_query(self, text: str) -> bool:
+        prompt = f"""
+        사용자가 입력한 텍스트가 의미 있는 질문(정보 요청, 명령, 질문 등)인지 판단해줘.
+        단순 인사, 감탄, 감정 표현("ㅋㅋ", "헐", "ㅇㅈ", "ㅎㅇ", "ㅂㅇ", "ㄹㅇ", "하이", "방가" 등)은 전부 "NO"로 답해줘.
 
+        입력: "{text}"
+        의미 있는 질문입니까? (YES 또는 NO)
+        """
+        try:
+            response = self.batch_llm.invoke([HumanMessage(content=prompt)])
+            answer = response.content.strip().upper()
+            return answer.startswith("YES")
+        except Exception as e:
+            print(f"❌ 의미 필터링 실패: {e}")
+            return True  # 예외 발생 시에는 의미 있다고 간주
+    def _is_greeting(self, text: str) -> bool:
+        prompt = f"""
+        다음 문장이 '인사'(greeting)인지 판단해줘. 인사는 처음 대화를 시작할 때 쓰는 표현이야.
+        단순한 감탄사나 감정 표현(ㅋㅋ, 헐, ㅇㅈ 등)은 인사로 보지 마.
+
+        문장: "{text}"
+        인사입니까? (YES 또는 NO)
+        """
+        try:
+            response = self.batch_llm.invoke([HumanMessage(content=prompt)])
+            answer = response.content.strip().upper()
+            return answer.startswith("YES")
+        except Exception as e:
+            print(f"❌ 인사 필터링 실패: {e}")
+            return False
 
 # 사용 예시
 if __name__ == "__main__":
