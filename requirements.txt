@@ -1,0 +1,13 @@
+# 웹 애플리케이션
+streamlit>=1.28.0
+
+# LangChain 핵심 패키지
+langchain>=0.1.0
+langchain-openai>=0.0.5
+langchain-community>=0.0.20
+langchain-core>=0.1.20
+
+# 기타 필수 패키지
+requests>=2.31.0
+python-dotenv>=1.0.0
+pydantic>=2.5.0
