@@ -6,7 +6,11 @@ import sqlite3
 import json
 from typing import Dict, List, Optional, Any
 from pathlib import Path
+<<<<<<< HEAD
 
+=======
+from datetime import datetime
+>>>>>>> 98f88f8369a00fea011ba0112cbc9097e2eb5e55
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -300,6 +304,7 @@ class DatabaseQueryEngine:
         
         return result
 
+<<<<<<< HEAD
     def format_product_list(self, products: List[Dict[str, Any]]) -> str:
         """상품 목록을 포맷팅"""
         if not products:
@@ -388,6 +393,8 @@ class DatabaseQueryEngine:
             print(f"❌ 사용자 목록 조회 실패: {e}")
             return []
 
+=======
+>>>>>>> 98f88f8369a00fea011ba0112cbc9097e2eb5e55
 # 사용 예시
 if __name__ == "__main__":
     db_engine = DatabaseQueryEngine()
