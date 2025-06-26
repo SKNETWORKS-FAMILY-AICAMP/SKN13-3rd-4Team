@@ -138,8 +138,10 @@ data/raw_docs/product_info.json
 - `description`: 상품 설명
 - `specifications`: 사양 정보 (객체)
 - `features`: 주요 기능 (배열)
-- `stock`: 재고 수량
 - `keywords`: 검색 키워드 (배열)
+
+#### 선택 필드
+- `stock`: 재고 수량 (없으면 "재고 확인 필요"로 표시)
 
 ### 데이터 업데이트 프로세스
 

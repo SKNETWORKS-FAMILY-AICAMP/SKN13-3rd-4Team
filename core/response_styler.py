@@ -19,6 +19,8 @@ class ResponseTone(Enum):
     INFORMATIVE = "informative"    # 정보 제공형
     APOLOGETIC = "apologetic"      # 사과하는
     ENTHUSIASTIC = "enthusiastic"  # 열정적인
+    HELPFUL = "helpful"            # 도움이 되는
+    FORMAL = "formal"              # 격식있는
 
 
 class ResponseStyler:
@@ -33,7 +35,9 @@ class ResponseStyler:
             ResponseTone.PROFESSIONAL: ["📋", "💼", "📊", "✅", "📝"],
             ResponseTone.INFORMATIVE: ["ℹ️", "📚", "💡", "🔍", "📖"],
             ResponseTone.APOLOGETIC: ["😔", "🙏", "💔", "😞", "🤲"],
-            ResponseTone.ENTHUSIASTIC: ["🎉", "🚀", "⭐", "🔥", "💪"]
+            ResponseTone.ENTHUSIASTIC: ["🎉", "🚀", "⭐", "🔥", "💪"],
+            ResponseTone.HELPFUL: ["🤝", "💪", "👍", "✨", "🌟"],
+            ResponseTone.FORMAL: ["📋", "💼", "📊", "✅", "📝"]
         }
         
         # 인사말 패턴
@@ -79,7 +83,9 @@ class ResponseStyler:
             ResponseTone.PROFESSIONAL: "전문적이고 정중한 톤",
             ResponseTone.INFORMATIVE: "정보 전달에 집중한 명확한 톤",
             ResponseTone.APOLOGETIC: "사과하고 공감하는 톤",
-            ResponseTone.ENTHUSIASTIC: "열정적이고 긍정적인 톤"
+            ResponseTone.ENTHUSIASTIC: "열정적이고 긍정적인 톤",
+            ResponseTone.HELPFUL: "도움이 되고 지원하는 톤",
+            ResponseTone.FORMAL: "격식있고 공식적인 톤"
         }
         return descriptions.get(tone, "친근한 톤")
     
