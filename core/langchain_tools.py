@@ -194,17 +194,24 @@ class DeliveryTrackingTool(BaseTool):
                     user_id_int = int(self._current_user_id)
                     orders = self._db_engine.get_user_orders(user_id_int)
 
+                    print(f"🔍 디버그: 사용자 ID {user_id_int}, 상품명 '{product_name}' 검색")
+                    print(f"🔍 디버그: 총 {len(orders)}개 주문 조회됨")
+
                     # 상품명이 포함된 주문 찾기
                     matching_order = None
                     for order in orders:
+                        print(f"🔍 디버그: 주문 {order['order_id']} 확인 중")
                         for item in order.get('items', []):
+                            print(f"🔍 디버그: 상품 '{item['product_name']}' vs 검색어 '{product_name}'")
                             if product_name.lower() in item['product_name'].lower():
+                                print(f"✅ 디버그: 매칭된 상품 발견!")
                                 matching_order = order
                                 break
                         if matching_order:
                             break
 
                     if matching_order:
+                        print(f"✅ 디버그: 매칭된 주문 {matching_order['order_id']} 발견")
                         # 해당 주문의 배송 정보 조회
                         delivery_info = self._delivery_api.get_delivery_status_by_order(matching_order)
                         if delivery_info:
@@ -212,7 +219,13 @@ class DeliveryTrackingTool(BaseTool):
                         else:
                             return f"'{product_name}' 상품의 배송 정보를 조회할 수 없습니다."
                     else:
-                        return f"'{product_name}' 상품을 포함한 주문을 찾을 수 없습니다."
+                        print(f"❌ 디버그: '{product_name}' 상품을 포함한 주문을 찾을 수 없습니다.")
+                        # 사용자의 모든 상품 목록 출력 (디버깅용)
+                        all_products = []
+                        for order in orders:
+                            for item in order.get('items', []):
+                                all_products.append(item['product_name'])
+                        return f"'{product_name}' 상품을 포함한 주문을 찾을 수 없습니다.\n\n현재 주문하신 상품들: {', '.join(all_products)}"
 
                 except (ValueError, TypeError):
                     return "사용자 정보를 확인할 수 없습니다."
