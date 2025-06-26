@@ -329,7 +329,12 @@ class DatabaseQueryEngine:
                 elif isinstance(features, str):
                     result += f"   ✨ 특징: {features}\n"
 
-            result += f"   📦 재고: {product.get('stock', '확인 필요')}개\n"
+            # 재고 정보 (선택 필드)
+            stock = product.get('stock') or product.get('stock_quantity')
+            if stock is not None:
+                result += f"   📦 재고: {stock}개\n"
+            else:
+                result += f"   📦 재고: 재고 확인 필요\n"
             result += "\n"
 
         return result

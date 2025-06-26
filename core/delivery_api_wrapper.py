@@ -196,26 +196,100 @@ class DeliveryAPIWrapper:
         ]
     
     def format_delivery_info(self, delivery_info: Dict[str, Any]) -> str:
-        """배송 정보를 사용자 친화적 형식으로 포맷팅"""
+        """배송 정보를 사용자 친화적 형식으로 포맷팅 (매우 간결 버전)"""
         if not delivery_info:
             return "배송 정보를 찾을 수 없습니다."
-        
-        result = f"📦 **배송 추적 정보**\n\n"
-        result += f"🚚 **운송장번호:** {delivery_info['tracking_number']}\n"
-        result += f"🏢 **택배사:** {delivery_info['carrier']}\n"
-        result += f"📍 **현재 상태:** {delivery_info['status']}\n"
-        result += f"🌍 **현재 위치:** {delivery_info['current_location']}\n"
-        result += f"🕐 **마지막 업데이트:** {delivery_info['last_update']}\n"
-        result += f"👤 **수취인:** {delivery_info['recipient']}\n\n"
-        
-        # 배송 이력
-        if delivery_info.get('tracking_details'):
-            result += "📋 **배송 이력:**\n"
-            for detail in delivery_info['tracking_details']:
-                result += f"• {detail['time']} - {detail['location']}: {detail['status']}\n"
-        
-        return result
+
+        # 핵심 정보만 한 줄로 제공
+        status = delivery_info['status']
+        location = delivery_info['current_location']
+
+        if status == '배송완료':
+            return f"✅ 배송완료되었습니다."
+        elif status == '배송중':
+            return f"🚚 배송중입니다. (현재 위치: {location})"
+        elif status == '주문확인':
+            return f"📋 주문이 확인되었습니다. 곧 배송 준비가 시작됩니다."
+        else:
+            return f"📦 {status} 상태입니다."
     
+    def get_delivery_status_by_order(self, order: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """주문 정보로 배송 상태 조회"""
+        try:
+            tracking_number = order.get('tracking_number')
+            carrier = order.get('carrier', '한진택배')
+
+            if tracking_number:
+                # 운송장번호가 있으면 실제 추적
+                return self.track_package(tracking_number, carrier)
+            else:
+                # 운송장번호가 없으면 주문 상태 기반 목 데이터 생성
+                order_status = order.get('status', '주문확인')
+                order_id = order.get('order_id', '')
+
+                if order_status == '배송완료':
+                    status = '배송완료'
+                    location = '배송완료'
+                    description = '배송이 완료되었습니다'
+                elif order_status == '배송중':
+                    status = '배송중'
+                    location = '대구 허브'
+                    description = '배송 중입니다'
+                elif order_status == '배송준비중':
+                    status = '배송준비중'
+                    location = '물류센터'
+                    description = '배송 준비 중입니다'
+                else:
+                    status = '주문확인'
+                    location = '주문처리중'
+                    description = '주문이 확인되었습니다'
+
+                return {
+                    "tracking_number": tracking_number or f"주문번호: {order_id}",
+                    "carrier": carrier,
+                    "status": status,
+                    "current_location": location,
+                    "last_update": order.get('order_date', '2024-12-01'),
+                    "recipient": order.get('delivery_address', '').split()[0] if order.get('delivery_address') else '고객님',
+                    "tracking_details": [
+                        {
+                            "time": order.get('order_date', '2024-12-01'),
+                            "location": location,
+                            "status": status,
+                            "description": description
+                        }
+                    ]
+                }
+        except Exception as e:
+            print(f"❌ 주문 기반 배송 조회 실패: {e}")
+            return None
+
+    def track_package_real_api(self, tracking_number: str, carrier: str = "한진택배") -> Optional[Dict[str, Any]]:
+        """실제 API를 우선 사용하는 배송 추적 (기존 track_package와 동일하지만 명시적 이름)"""
+        return self.track_package(tracking_number, carrier)
+
+    def check_delivery_availability(self, address: str) -> Dict[str, Any]:
+        """배송 가능 지역 확인"""
+        # 간단한 배송 가능 지역 체크
+        if "제주" in address:
+            return {
+                "available": True,
+                "note": "제주도는 추가 배송비가 발생할 수 있습니다.",
+                "extra_days": 1
+            }
+        elif any(keyword in address for keyword in ["울릉도", "독도", "백령도"]):
+            return {
+                "available": False,
+                "note": "해당 지역은 배송이 불가능합니다.",
+                "extra_days": 0
+            }
+        else:
+            return {
+                "available": True,
+                "note": "일반 배송 가능 지역입니다.",
+                "extra_days": 0
+            }
+
     def get_delivery_estimate(self, origin: str, destination: str) -> Dict[str, Any]:
         """배송 예상 시간 조회"""
         # 간단한 배송 예상 시간 계산
@@ -224,11 +298,11 @@ class DeliveryAPIWrapper:
             ("서울", "부산"): {"days": 2, "description": "1-2일 소요"},
             ("서울", "제주"): {"days": 3, "description": "2-3일 소요 (항공 운송)"},
         }
-        
+
         key = (origin, destination)
         if key in estimates:
             return estimates[key]
-        
+
         # 기본 예상 시간
         return {"days": 2, "description": "2-3일 소요 예상"}
 
