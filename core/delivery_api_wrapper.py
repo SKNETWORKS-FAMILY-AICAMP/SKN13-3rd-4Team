@@ -66,12 +66,18 @@ class DeliveryAPIWrapper:
     def track_package_real_api(self, tracking_number: str, carrier: str) -> Optional[Dict[str, Any]]:
         """스마트택배 API를 사용한 실제 배송 추적"""
         try:
+<<<<<<< HEAD
             print(f"🔍 배송 추적 시작: 운송장번호={tracking_number}, 택배사={carrier}")
 
             carrier_code = self._get_carrier_code(carrier)
             if not carrier_code:
                 print(f"⚠️ 지원하지 않는 택배사: {carrier}")
                 print(f"📋 지원 택배사: {list(self.carrier_codes.keys())}")
+=======
+            carrier_code = self._get_carrier_code(carrier)
+            if not carrier_code:
+                print(f"⚠️ 지원하지 않는 택배사: {carrier}")
+>>>>>>> 98f88f8369a00fea011ba0112cbc9097e2eb5e55
                 return None
 
             if not self.api_key:
@@ -87,6 +93,7 @@ class DeliveryAPIWrapper:
                 't_invoice': tracking_number
             }
 
+<<<<<<< HEAD
             print(f"🌐 API 호출: {url}")
             print(f"📋 파라미터: 택배사코드={carrier_code}, 운송장번호={tracking_number}")
 
@@ -127,6 +134,21 @@ class DeliveryAPIWrapper:
             else:
                 print(f"❌ API 호출 실패: {response.status_code}")
                 print(f"📄 응답 내용: {response.text}")
+=======
+            response = requests.get(url, params=params, timeout=10)
+
+            if response.status_code == 200:
+                data = response.json()
+
+                # 스마트택배 응답을 우리 형식으로 변환
+                if data.get('status') == True and data.get('trackingDetails'):
+                    return self._convert_sweettracker_response(data, tracking_number, carrier)
+                else:
+                    print(f"❌ 배송 정보 없음: {data.get('msg', '알 수 없는 오류')}")
+                    return None
+            else:
+                print(f"❌ API 호출 실패: {response.status_code}")
+>>>>>>> 98f88f8369a00fea011ba0112cbc9097e2eb5e55
                 return None
 
         except requests.RequestException as e:
@@ -134,8 +156,11 @@ class DeliveryAPIWrapper:
             return None
         except Exception as e:
             print(f"❌ API 호출 중 오류: {e}")
+<<<<<<< HEAD
             import traceback
             traceback.print_exc()
+=======
+>>>>>>> 98f88f8369a00fea011ba0112cbc9097e2eb5e55
             return None
 
     def _convert_sweettracker_response(self, data: Dict, tracking_number: str, carrier: str) -> Dict[str, Any]:
@@ -185,6 +210,7 @@ class DeliveryAPIWrapper:
     def track_package_mock(self, tracking_number: str) -> Optional[Dict[str, Any]]:
         """목 데이터를 사용한 배송 추적"""
         mock_data = self._load_mock_data()
+<<<<<<< HEAD
 
         for delivery in mock_data:
             if delivery['tracking_number'] == tracking_number:
@@ -201,10 +227,25 @@ class DeliveryAPIWrapper:
         if use_mock or not self.api_key:
             # 목 데이터 사용 (API 키가 없거나 명시적으로 목 데이터 사용 요청)
             print("📦 목 데이터를 사용하여 배송 정보를 조회합니다.")
+=======
+        
+        for delivery in mock_data:
+            if delivery['tracking_number'] == tracking_number:
+                return delivery
+        
+        return None
+    
+    def track_package(self, tracking_number: str, carrier: Optional[str] = None, 
+                     use_mock: bool = True) -> Optional[Dict[str, Any]]:
+        """배송 추적 메인 함수"""
+        if use_mock:
+            # 목 데이터 사용
+>>>>>>> 98f88f8369a00fea011ba0112cbc9097e2eb5e55
             return self.track_package_mock(tracking_number)
         else:
             # 실제 API 사용
             if not carrier:
+<<<<<<< HEAD
                 # 택배사 정보가 없으면 목 데이터로 폴백
                 print("⚠️ 택배사 정보가 없어 목 데이터를 사용합니다.")
                 return self.track_package_mock(tracking_number)
@@ -229,6 +270,11 @@ class DeliveryAPIWrapper:
                     }
 
             return result
+=======
+                print("❌ 실제 API 사용 시 택배사 정보가 필요합니다.")
+                return None
+            return self.track_package_real_api(tracking_number, carrier)
+>>>>>>> 98f88f8369a00fea011ba0112cbc9097e2eb5e55
     
     def get_delivery_status_by_order(self, order_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """주문 정보를 통한 배송 상태 조회"""
@@ -243,9 +289,14 @@ class DeliveryAPIWrapper:
                 "carrier": carrier
             }
         
+<<<<<<< HEAD
         # 실제 API 우선 사용, 실패 시 목 데이터로 폴백
         delivery_info = self.track_package(tracking_number, carrier, use_mock=False)
 
+=======
+        delivery_info = self.track_package(tracking_number, carrier)
+        
+>>>>>>> 98f88f8369a00fea011ba0112cbc9097e2eb5e55
         if delivery_info:
             return delivery_info
         else:
@@ -260,11 +311,15 @@ class DeliveryAPIWrapper:
         """배송 정보를 사용자 친화적 형태로 포맷팅"""
         if not delivery_info:
             return "배송 정보를 찾을 수 없습니다."
+<<<<<<< HEAD
 
         # 오류 응답 처리
         if delivery_info.get('error_type'):
             return delivery_info.get('user_message', '배송 정보 조회 중 오류가 발생했습니다.')
 
+=======
+        
+>>>>>>> 98f88f8369a00fea011ba0112cbc9097e2eb5e55
         result = f"🚚 **배송 현황**\n"
         result += f"• 운송장번호: {delivery_info.get('tracking_number', 'N/A')}\n"
         result += f"• 택배사: {delivery_info.get('delivery_company', 'N/A')}\n"
