@@ -8,6 +8,8 @@ from langchain_openai import ChatOpenAI
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage, AIMessage
+from core.response_styler import ResponseStyler
+
 from dotenv import load_dotenv
 
 from .langchain_tools import get_all_tools
@@ -19,6 +21,7 @@ class ToolCallingAgentProcessor:
     """Tool Calling Agent 기반 쿼리 프로세서"""
 
     def __init__(self, model_name: str = "gpt-4o-mini", temperature: float = 0.1):
+        self.response_styler = ResponseStyler()
         """
         Args:
             model_name: 사용할 LLM 모델명 (기본: gpt-4o-mini - 비용 효율적)
