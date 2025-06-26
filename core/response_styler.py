@@ -19,7 +19,8 @@ class ResponseTone(Enum):
     INFORMATIVE = "informative"    # 정보 제공형
     APOLOGETIC = "apologetic"      # 사과하는
     ENTHUSIASTIC = "enthusiastic"  # 열정적인
-
+    HELPFUL = "helpful"
+    FORMAL = "formal"  
 
 class ResponseStyler:
     """응답 스타일링 클래스"""
