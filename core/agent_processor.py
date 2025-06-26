@@ -73,8 +73,7 @@ class ToolCallingAgentProcessor:
             tools=self.tools,
             verbose=True,
             handle_parsing_errors=True,
-            max_iterations=3,
-            early_stopping_method="generate"
+            max_iterations=3
         )
     
     def _create_system_prompt(self) -> str:
