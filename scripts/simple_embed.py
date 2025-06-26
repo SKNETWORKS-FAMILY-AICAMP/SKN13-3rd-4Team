@@ -1,8 +1,10 @@
 """
-간단한 문서 임베딩 스크립트 (테스트용)
+문서 임베딩 스크립트
+FAQ와 상품 정보를 벡터 데이터베이스에 임베딩
 """
 import json
 import os
+import sys
 from pathlib import Path
 from dotenv import load_dotenv
 from langchain_community.vectorstores import Chroma
@@ -12,8 +14,10 @@ from langchain_core.documents import Document
 # 환경변수 로드
 load_dotenv()
 
-# 프로젝트 루트 경로
+# 프로젝트 루트 경로 설정
 project_root = Path(__file__).parent.parent
+sys.path.append(str(project_root))
+
 data_dir = project_root / "data"
 vector_db_path = data_dir / "vectordb_chroma"
 
@@ -128,24 +132,40 @@ def test_search():
             print(f"  소스: {doc.metadata.get('source', 'unknown')}")
 
 def main():
-    """메인 함수"""
-    print("🚀 간단한 문서 임베딩 시작...")
-    
+    """메인 실행 함수"""
+    print("🚀 문서 임베딩 시작...")
+
     try:
-        # 벡터 스토어 생성
-        vectorstore = create_vector_store()
-        
-        if vectorstore:
-            # 검색 테스트
-            test_search()
-            print("\n✅ 문서 임베딩 완료!")
-        else:
-            print("❌ 벡터 스토어 생성 실패")
-            
+        # RAG 프로세서를 사용한 임베딩
+        from core.rag_processor import RAGProcessor
+
+        rag_processor = RAGProcessor()
+        rag_processor.initialize_vector_store()
+
+        print("✅ 문서 임베딩 완료!")
+
+        # 테스트 쿼리 실행
+        test_queries = [
+            "배송비는 얼마인가요?",
+            "무선 이어폰 사양이 어떻게 되나요?",
+            "반품은 어떻게 하나요?"
+        ]
+
+        print("\n🔍 테스트 쿼리 실행:")
+        for query in test_queries:
+            print(f"\n질문: {query}")
+            result = rag_processor.process_query(query)
+            print(f"답변: {result['response'][:100]}...")
+            print(f"신뢰도: {result['confidence']:.2f}")
+            print(f"소스 수: {len(result['sources'])}")
+
+        return 0
+
     except Exception as e:
         print(f"❌ 오류 발생: {e}")
         import traceback
         traceback.print_exc()
+        return 1
 
 if __name__ == "__main__":
-    main()
+    exit(main())

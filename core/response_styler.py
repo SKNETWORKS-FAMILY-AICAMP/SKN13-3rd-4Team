@@ -1,390 +1,218 @@
 """
-<<<<<<< HEAD
 응답 스타일러 모듈
-응답의 톤앤매너를 조정하고 이모지 및 포맷팅을 적용
-"""
-from enum import Enum
-from typing import Optional
-
-
-class ResponseTone(Enum):
-    """응답 톤 유형"""
-    FRIENDLY = "friendly"
-    HELPFUL = "helpful"
-    INFORMATIVE = "informative"
-    FORMAL = "formal"
-    APOLOGETIC = "apologetic"
-
-=======
-응답 스타일러
-챗봇 응답의 톤앤매너를 조정하고 일관된 스타일로 변환
+AI 응답의 톤앤매너를 조정하고 이모지를 추가하여 사용자 친화적으로 만드는 모듈
 """
 import random
-from typing import Dict, List, Optional
 from enum import Enum
-
+from typing import Dict, List, Optional
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class ResponseTone(Enum):
-    """응답 톤 유형"""
-    FRIENDLY = "friendly"      # 친근한
-    FORMAL = "formal"          # 정중한
-    HELPFUL = "helpful"        # 도움이 되는
-    APOLOGETIC = "apologetic"  # 사과하는
-    INFORMATIVE = "informative" # 정보 제공형
->>>>>>> 98f88f8369a00fea011ba0112cbc9097e2eb5e55
+    """응답 톤 종류"""
+    FRIENDLY = "friendly"          # 친근한
+    PROFESSIONAL = "professional"  # 전문적인
+    INFORMATIVE = "informative"    # 정보 제공형
+    APOLOGETIC = "apologetic"      # 사과하는
+    ENTHUSIASTIC = "enthusiastic"  # 열정적인
+
 
 class ResponseStyler:
     """응답 스타일링 클래스"""
     
     def __init__(self):
-<<<<<<< HEAD
-        self.greeting_emojis = {
-            ResponseTone.FRIENDLY: "😊",
-            ResponseTone.HELPFUL: "🤝",
-            ResponseTone.INFORMATIVE: "📋",
-            ResponseTone.FORMAL: "💼",
-            ResponseTone.APOLOGETIC: "😔"
+        self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
+        
+        # 톤별 이모지 매핑
+        self.tone_emojis = {
+            ResponseTone.FRIENDLY: ["😊", "🙂", "😄", "🤗", "💝"],
+            ResponseTone.PROFESSIONAL: ["📋", "💼", "📊", "✅", "📝"],
+            ResponseTone.INFORMATIVE: ["ℹ️", "📚", "💡", "🔍", "📖"],
+            ResponseTone.APOLOGETIC: ["😔", "🙏", "💔", "😞", "🤲"],
+            ResponseTone.ENTHUSIASTIC: ["🎉", "🚀", "⭐", "🔥", "💪"]
         }
         
-        self.greeting_phrases = {
-            ResponseTone.FRIENDLY: "안녕하세요!",
-            ResponseTone.HELPFUL: "도움을 드리겠습니다!",
-            ResponseTone.INFORMATIVE: "정보를 안내해드리겠습니다.",
-            ResponseTone.FORMAL: "안녕하십니까.",
-            ResponseTone.APOLOGETIC: "죄송합니다."
-        }
-    
-    def style_response(self, response: str, tone: ResponseTone = ResponseTone.FRIENDLY, 
-                      include_greeting: bool = False) -> str:
-        """
-        응답에 스타일링 적용
-        
-        Args:
-            response: 원본 응답 텍스트
-            tone: 적용할 톤
-            include_greeting: 인사말 포함 여부
-            
-        Returns:
-            스타일링된 응답
-        """
-        styled_response = response
-        
-        # 인사말 추가
-        if include_greeting:
-            emoji = self.greeting_emojis.get(tone, "")
-            greeting = self.greeting_phrases.get(tone, "안녕하세요!")
-            styled_response = f"{emoji} {greeting}\n\n{styled_response}"
-        
-        # 톤에 따른 추가 스타일링
-        if tone == ResponseTone.HELPFUL:
-            styled_response += "\n\n추가로 궁금한 점이 있으시면 언제든 말씀해주세요! 🤗"
-        elif tone == ResponseTone.APOLOGETIC:
-            styled_response += "\n\n불편을 드려 죄송합니다. 더 나은 서비스로 보답하겠습니다."
-        elif tone == ResponseTone.INFORMATIVE:
-            styled_response = f"📌 {styled_response}"
-        
-        return styled_response
-    
-    def determine_tone(self, intent: str, confidence: float) -> ResponseTone:
-        """
-        의도와 신뢰도에 따른 톤 결정
-        
-        Args:
-            intent: 의도 유형
-            confidence: 신뢰도
-            
-        Returns:
-            적절한 응답 톤
-        """
-        if confidence < 0.5:
-            return ResponseTone.APOLOGETIC
-        elif intent in ["FAQ", "PRODUCT_INFO"]:
-            return ResponseTone.INFORMATIVE
-        elif intent in ["ORDER_STATUS", "DELIVERY_TRACK"]:
-            return ResponseTone.HELPFUL
-        elif intent == "GENERAL":
-            return ResponseTone.FRIENDLY
-        else:
-            return ResponseTone.FORMAL
-
-=======
-        self.llm = ChatOpenAI(
-            model="gpt-4",
-            temperature=0.3
-        )
-        
-        # 기본 인사말 템플릿
+        # 인사말 패턴
         self.greetings = [
+            "안녕하세요!",
+            "반갑습니다!",
             "안녕하세요! 😊",
-            "반갑습니다! 👋",
-            "안녕하세요, 고객님! 🌟",
-            "좋은 하루입니다! ☀️"
+            "좋은 하루입니다!",
+            "환영합니다!"
         ]
         
-        # 마무리 문구 템플릿
-        self.closings = {
-            ResponseTone.FRIENDLY: [
-                "더 궁금한 점이 있으시면 언제든 말씀해주세요! 😊",
-                "도움이 되셨길 바라요! 좋은 하루 되세요! 🌟",
-                "또 다른 질문이 있으시면 편하게 물어보세요! 👍"
-            ],
-            ResponseTone.FORMAL: [
-                "추가 문의사항이 있으시면 언제든 연락주시기 바랍니다.",
-                "더 자세한 상담이 필요하시면 고객센터(1588-1234)로 문의해주세요.",
-                "감사합니다. 좋은 하루 되시기 바랍니다."
-            ],
-            ResponseTone.HELPFUL: [
-                "이 정보가 도움이 되셨나요? 더 필요한 정보가 있으시면 말씀해주세요!",
-                "문제 해결에 도움이 되었기를 바랍니다. 추가 질문 언제든 환영입니다!",
-                "더 구체적인 도움이 필요하시면 언제든 말씀해주세요!"
-            ],
-            ResponseTone.APOLOGETIC: [
-                "불편을 드려 죄송합니다. 더 나은 서비스로 보답하겠습니다.",
-                "양해 부탁드리며, 추가 도움이 필요하시면 언제든 연락주세요.",
-                "죄송합니다. 더 정확한 정보를 위해 고객센터로 문의해주시면 감사하겠습니다."
-            ]
-        }
+        # 마무리 문구
+        self.closings = [
+            "더 궁금한 점이 있으시면 언제든지 문의해 주세요!",
+            "추가로 도움이 필요하시면 말씀해 주세요!",
+            "다른 질문이 있으시면 언제든 말씀해 주세요!",
+            "더 도움이 필요하시면 고객센터(1588-1234)로 연락해 주세요!",
+            "감사합니다! 좋은 하루 되세요!"
+        ]
         
-        # 에러 메시지 템플릿
-        self.error_messages = {
-            "not_found": [
-                "죄송합니다. 요청하신 정보를 찾을 수 없습니다.",
-                "해당 정보가 확인되지 않습니다.",
-                "요청하신 내용에 대한 정보가 없습니다."
-            ],
-            "system_error": [
-                "일시적인 시스템 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-                "현재 시스템 점검 중입니다. 불편을 드려 죄송합니다.",
-                "기술적인 문제가 발생했습니다. 고객센터로 문의해주세요."
-            ],
-            "insufficient_info": [
-                "더 정확한 답변을 위해 추가 정보가 필요합니다.",
-                "좀 더 구체적인 정보를 알려주시면 더 나은 도움을 드릴 수 있습니다.",
-                "정확한 안내를 위해 세부 사항을 확인해주세요."
-            ]
-        }
-        
-        # 스타일링 프롬프트
-        self.styling_prompt = ChatPromptTemplate.from_messages([
-            ("system", """당신은 쇼핑몰 고객 서비스 응답 스타일링 전문가입니다.
+        # 스타일링 프롬프트 템플릿
+        self.style_prompt = ChatPromptTemplate.from_messages([
+            ("system", """당신은 쇼핑몰 고객 서비스 응답 스타일러입니다.
+            
+주어진 응답을 다음 톤으로 다시 작성해주세요:
+- {tone}: {tone_description}
 
-주어진 응답을 다음 가이드라인에 따라 스타일링해주세요:
+스타일링 가이드라인:
+1. 원본 정보는 그대로 유지
+2. 지정된 톤에 맞게 문체 조정
+3. 적절한 이모지 1-2개 추가
+4. 자연스럽고 친근한 표현 사용
+5. 너무 과하지 않게 적당히 조정
 
-**기본 원칙:**
-1. 친근하고 정중한 어조 유지
-2. 고객의 감정에 공감하며 응답
-3. 구체적이고 실용적인 정보 제공
-4. 적절한 이모지 사용으로 친근감 표현
-5. 추가 도움 제안으로 마무리
-
-**톤 별 특징:**
-- friendly: 친근하고 따뜻한 어조, 이모지 적극 활용
-- formal: 정중하고 격식 있는 어조, 이모지 최소화
-- helpful: 도움이 되는 정보 중심, 실용적 조언 포함
-- apologetic: 사과와 이해의 어조, 대안 제시
-- informative: 정확한 정보 전달 중심, 체계적 구성
-
-**응답 구조:**
-1. 인사/공감 표현
-2. 핵심 정보 제공
-3. 추가 설명 (필요시)
-4. 마무리 인사/추가 도움 제안
-
-톤: {tone}
-원본 응답: {original_response}
-
-스타일링된 응답을 제공해주세요:"""),
-            ("human", "원본 응답을 위의 가이드라인에 따라 스타일링해주세요.")
+원본 응답: {original_response}"""),
+            ("human", "위 응답을 {tone} 톤으로 스타일링해주세요.")
         ])
     
-    def determine_tone(self, intent: str, confidence: float, 
-                      has_error: bool = False) -> ResponseTone:
-        """상황에 따른 적절한 톤 결정"""
-        if has_error:
+    def get_tone_description(self, tone: ResponseTone) -> str:
+        """톤 설명 반환"""
+        descriptions = {
+            ResponseTone.FRIENDLY: "친근하고 따뜻한 톤",
+            ResponseTone.PROFESSIONAL: "전문적이고 정중한 톤",
+            ResponseTone.INFORMATIVE: "정보 전달에 집중한 명확한 톤",
+            ResponseTone.APOLOGETIC: "사과하고 공감하는 톤",
+            ResponseTone.ENTHUSIASTIC: "열정적이고 긍정적인 톤"
+        }
+        return descriptions.get(tone, "친근한 톤")
+    
+    def add_emoji(self, text: str, tone: ResponseTone, count: int = 1) -> str:
+        """텍스트에 톤에 맞는 이모지 추가"""
+        emojis = self.tone_emojis.get(tone, ["😊"])
+        selected_emojis = random.sample(emojis, min(count, len(emojis)))
+        
+        # 이모지를 자연스럽게 배치
+        if random.choice([True, False]):
+            # 앞에 추가
+            return f"{' '.join(selected_emojis)} {text}"
+        else:
+            # 뒤에 추가
+            return f"{text} {' '.join(selected_emojis)}"
+    
+    def add_greeting(self, text: str) -> str:
+        """인사말 추가"""
+        greeting = random.choice(self.greetings)
+        return f"{greeting} {text}"
+    
+    def add_closing(self, text: str) -> str:
+        """마무리 문구 추가"""
+        closing = random.choice(self.closings)
+        return f"{text}\n\n{closing}"
+    
+    def style_response(
+        self, 
+        response: str, 
+        tone: ResponseTone = ResponseTone.FRIENDLY,
+        include_greeting: bool = False,
+        include_closing: bool = True,
+        include_emoji: bool = True
+    ) -> str:
+        """응답 스타일링"""
+        try:
+            # LLM을 사용한 톤 조정
+            styled_response = self.llm.invoke(
+                self.style_prompt.format_messages(
+                    tone=tone.value,
+                    tone_description=self.get_tone_description(tone),
+                    original_response=response
+                )
+            ).content
+            
+            # 인사말 추가
+            if include_greeting:
+                styled_response = self.add_greeting(styled_response)
+            
+            # 마무리 문구 추가
+            if include_closing:
+                styled_response = self.add_closing(styled_response)
+            
+            # 이모지 추가 (LLM이 이미 추가했을 수 있으므로 조건부)
+            if include_emoji and not any(emoji in styled_response for emoji_list in self.tone_emojis.values() for emoji in emoji_list):
+                styled_response = self.add_emoji(styled_response, tone)
+            
+            return styled_response
+            
+        except Exception as e:
+            print(f"❌ 응답 스타일링 실패: {e}")
+            # 실패 시 기본 스타일링
+            return self._basic_styling(response, tone, include_greeting, include_closing, include_emoji)
+    
+    def _basic_styling(
+        self, 
+        response: str, 
+        tone: ResponseTone,
+        include_greeting: bool,
+        include_closing: bool,
+        include_emoji: bool
+    ) -> str:
+        """기본 스타일링 (LLM 실패 시 폴백)"""
+        styled = response
+        
+        if include_greeting:
+            styled = self.add_greeting(styled)
+        
+        if include_closing:
+            styled = self.add_closing(styled)
+        
+        if include_emoji:
+            styled = self.add_emoji(styled, tone)
+        
+        return styled
+    
+    def detect_tone_from_content(self, content: str) -> ResponseTone:
+        """내용에서 적절한 톤 자동 감지"""
+        content_lower = content.lower()
+        
+        # 사과 관련 키워드
+        if any(word in content_lower for word in ["죄송", "미안", "실패", "오류", "문제"]):
             return ResponseTone.APOLOGETIC
         
-        if confidence < 0.5:
-            return ResponseTone.HELPFUL
+        # 정보 제공 관련 키워드
+        elif any(word in content_lower for word in ["사양", "정보", "가격", "배송", "주문"]):
+            return ResponseTone.INFORMATIVE
         
-        # 의도별 기본 톤
-        tone_mapping = {
-            "faq": ResponseTone.FRIENDLY,
-            "product_info": ResponseTone.INFORMATIVE,
-            "order_status": ResponseTone.HELPFUL,
-            "delivery_track": ResponseTone.INFORMATIVE,
-            "user_info": ResponseTone.FORMAL,
-            "general": ResponseTone.FRIENDLY,
-            "unknown": ResponseTone.HELPFUL
-        }
+        # 긍정적 키워드
+        elif any(word in content_lower for word in ["완료", "성공", "좋은", "훌륭", "만족"]):
+            return ResponseTone.ENTHUSIASTIC
         
-        return tone_mapping.get(intent, ResponseTone.FRIENDLY)
+        # 기본은 친근한 톤
+        else:
+            return ResponseTone.FRIENDLY
     
-    def add_greeting(self, response: str, include_greeting: bool = True) -> str:
-        """인사말 추가"""
-        if not include_greeting:
-            return response
-        
-        # 이미 인사말이 있는지 확인
-        greeting_keywords = ["안녕", "반갑", "좋은", "감사"]
-        if any(keyword in response[:20] for keyword in greeting_keywords):
-            return response
-        
-        greeting = random.choice(self.greetings)
-        return f"{greeting} {response}"
-    
-    def add_closing(self, response: str, tone: ResponseTone) -> str:
-        """마무리 문구 추가"""
-        # 이미 마무리 문구가 있는지 확인
-        closing_keywords = ["문의", "연락", "도움", "감사", "바라", "환영"]
-        if any(keyword in response[-50:] for keyword in closing_keywords):
-            return response
-        
-        closings = self.closings.get(tone, self.closings[ResponseTone.FRIENDLY])
-        closing = random.choice(closings)
-        
-        return f"{response}\n\n{closing}"
-    
-    def add_emojis(self, response: str, tone: ResponseTone) -> str:
-        """적절한 이모지 추가"""
-        if tone == ResponseTone.FORMAL:
-            return response  # 격식 있는 톤에서는 이모지 최소화
-        
-        # 키워드별 이모지 매핑
-        emoji_mapping = {
-            "배송": "🚚",
-            "주문": "📦",
-            "상품": "🛍️",
-            "결제": "💳",
-            "반품": "↩️",
-            "교환": "🔄",
-            "완료": "✅",
-            "확인": "✅",
-            "문제": "⚠️",
-            "오류": "❌",
-            "죄송": "😔",
-            "감사": "🙏",
-            "도움": "💡",
-            "정보": "📋"
-        }
-        
-        # 이미 이모지가 충분히 있는지 확인
-        emoji_count = len([char for char in response if ord(char) > 127])
-        if emoji_count >= 3:
-            return response
-        
-        # 키워드 기반 이모지 추가
-        for keyword, emoji in emoji_mapping.items():
-            if keyword in response and emoji not in response:
-                response = response.replace(keyword, f"{keyword} {emoji}", 1)
-                break
-        
-        return response
-    
-    def handle_error_response(self, error_type: str, 
-                            additional_info: Optional[str] = None) -> str:
-        """에러 상황별 응답 생성"""
-        base_message = random.choice(self.error_messages.get(error_type, 
-                                                           self.error_messages["system_error"]))
-        
-        response = base_message
-        
-        if additional_info:
-            response += f" {additional_info}"
-        
-        # 대안 제시
-        if error_type == "not_found":
-            response += " 다른 키워드로 검색해보시거나 고객센터(1588-1234)로 문의해주세요."
-        elif error_type == "insufficient_info":
-            response += " 주문번호, 운송장번호, 또는 연락처 등을 함께 알려주시면 더 정확한 도움을 드릴 수 있습니다."
-        
-        return self.style_response(response, ResponseTone.APOLOGETIC)
-    
-    def style_response(self, response: str, tone: ResponseTone, 
-                      use_llm: bool = False, include_greeting: bool = False) -> str:
-        """응답 스타일링 메인 함수"""
-        if use_llm:
-            # LLM을 사용한 고급 스타일링
-            try:
-                chain = self.styling_prompt | self.llm
-                styled = chain.invoke({
-                    "tone": tone.value,
-                    "original_response": response
-                })
-                return styled.content
-            except Exception as e:
-                print(f"❌ LLM 스타일링 실패: {e}")
-                # 폴백으로 규칙 기반 스타일링 사용
-        
-        # 규칙 기반 스타일링
-        styled_response = response
-        
-        # 1. 인사말 추가
-        styled_response = self.add_greeting(styled_response, include_greeting)
-        
-        # 2. 이모지 추가
-        styled_response = self.add_emojis(styled_response, tone)
-        
-        # 3. 마무리 문구 추가
-        styled_response = self.add_closing(styled_response, tone)
-        
-        return styled_response
-    
-    def format_structured_response(self, title: str, content: str, 
-                                 tone: ResponseTone = ResponseTone.FRIENDLY) -> str:
-        """구조화된 응답 포맷팅"""
-        formatted = f"**{title}**\n\n{content}"
-        return self.style_response(formatted, tone)
-    
-    def create_quick_replies(self, suggestions: List[str]) -> str:
-        """빠른 답변 제안 생성"""
-        if not suggestions:
-            return ""
-        
-        reply_text = "\n\n💡 **이런 것도 궁금하신가요?**\n"
-        for i, suggestion in enumerate(suggestions[:3], 1):
-            reply_text += f"{i}. {suggestion}\n"
-        
-        return reply_text
->>>>>>> 98f88f8369a00fea011ba0112cbc9097e2eb5e55
+    def auto_style(self, response: str, **kwargs) -> str:
+        """자동 톤 감지 후 스타일링"""
+        detected_tone = self.detect_tone_from_content(response)
+        return self.style_response(response, tone=detected_tone, **kwargs)
+
 
 # 사용 예시
 if __name__ == "__main__":
     styler = ResponseStyler()
     
     # 테스트 응답들
-<<<<<<< HEAD
-    test_cases = [
-        ("배송비는 5만원 이상 주문시 무료입니다.", ResponseTone.INFORMATIVE),
-        ("주문번호 ORD123의 상태는 배송중입니다.", ResponseTone.HELPFUL),
-        ("죄송합니다. 해당 정보를 찾을 수 없습니다.", ResponseTone.APOLOGETIC),
-        ("안녕하세요! 무엇을 도와드릴까요?", ResponseTone.FRIENDLY)
-    ]
-    
-    print("🎨 응답 스타일러 테스트:")
-    print("=" * 50)
-    
-    for response, tone in test_cases:
-        styled = styler.style_response(response, tone, include_greeting=True)
-        print(f"톤: {tone.value}")
-        print(f"원본: {response}")
-        print(f"스타일링: {styled}")
-        print("-" * 30)
-=======
     test_responses = [
-        ("배송비는 5만원 이상 주문시 무료입니다.", ResponseTone.FRIENDLY),
-        ("주문번호 ORD20241201001의 상태는 배송중입니다.", ResponseTone.INFORMATIVE),
+        ("배송비는 5만원 이상 주문시 무료입니다.", ResponseTone.INFORMATIVE),
+        ("주문번호 ORD20241201001의 상태는 배송중입니다.", ResponseTone.PROFESSIONAL),
         ("죄송합니다. 해당 정보를 찾을 수 없습니다.", ResponseTone.APOLOGETIC),
-        ("상품 사양은 다음과 같습니다.", ResponseTone.HELPFUL)
+        ("주문이 성공적으로 완료되었습니다!", ResponseTone.ENTHUSIASTIC)
     ]
     
     for response, tone in test_responses:
-        print(f"\n원본: {response}")
+        print(f"원본: {response}")
         styled = styler.style_response(response, tone, include_greeting=True)
         print(f"스타일링: {styled}")
         print("-" * 50)
->>>>>>> 98f88f8369a00fea011ba0112cbc9097e2eb5e55
+    
+    # 자동 톤 감지 테스트
+    print("\n자동 톤 감지 테스트:")
+    auto_response = "시스템에 오류가 발생했습니다."
+    auto_styled = styler.auto_style(auto_response)
+    print(f"원본: {auto_response}")
+    print(f"자동 스타일링: {auto_styled}")

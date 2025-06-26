@@ -1,5 +1,6 @@
 """
-챗봇 기능 테스트 스크립트
+시스템 통합 테스트 스크립트
+전체 RAG 시스템과 Tool Calling Agent 테스트
 """
 import sys
 from pathlib import Path
@@ -8,42 +9,14 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
-from core.intent_classifier import IntentClassifier
-from core.rag_processor import RAGProcessor
-from core.db_query_engine import DatabaseQueryEngine
-from core.delivery_api_wrapper import DeliveryAPIWrapper
-from core.response_styler import ResponseStyler
-
-def test_intent_classifier():
-    """의도 분류기 테스트"""
-    print("🔍 의도 분류기 테스트")
-    print("-" * 50)
-    
-    classifier = IntentClassifier()
-    
-    test_cases = [
-        "배송비는 얼마인가요?",
-        "무선 이어폰 사양 알려주세요",
-        "주문번호 ORD20241201001 상태 확인해주세요",
-        "운송장번호 123456789012 배송 현황 알려주세요",
-        "반품은 어떻게 하나요?",
-        "안녕하세요",
-        "이상한 질문입니다"
-    ]
-    
-    for query in test_cases:
-        result = classifier.classify(query)
-        print(f"질문: {query}")
-        print(f"의도: {result.intent.value} (신뢰도: {result.confidence:.2f})")
-        print(f"엔티티: {result.entities}")
-        print()
-
 def test_rag_processor():
     """RAG 프로세서 테스트"""
     print("📚 RAG 프로세서 테스트")
     print("-" * 50)
     
     try:
+        from core.rag_processor import RAGProcessor
+        
         rag = RAGProcessor()
         rag.initialize_vector_store()
         
@@ -58,6 +31,7 @@ def test_rag_processor():
             print(f"질문: {query}")
             print(f"답변: {result['response'][:150]}...")
             print(f"신뢰도: {result['confidence']:.2f}")
+            print(f"응답 시간: {result['response_time']:.2f}초")
             print()
             
     except Exception as e:
@@ -69,6 +43,8 @@ def test_db_query_engine():
     print("-" * 50)
     
     try:
+        from core.db_query_engine import DatabaseQueryEngine
+        
         db_engine = DatabaseQueryEngine()
         
         # 주문 조회 테스트
@@ -98,6 +74,8 @@ def test_delivery_api():
     print("-" * 50)
     
     try:
+        from core.delivery_api_wrapper import DeliveryAPIWrapper
+        
         delivery_api = DeliveryAPIWrapper()
         
         # 배송 추적 테스트
@@ -117,51 +95,84 @@ def test_delivery_api():
     except Exception as e:
         print(f"❌ 배송 API 테스트 실패: {e}")
 
-def test_response_styler():
-    """응답 스타일러 테스트"""
-    print("✨ 응답 스타일러 테스트")
+def test_tool_calling_agent():
+    """Tool Calling Agent 테스트"""
+    print("🤖 Tool Calling Agent 테스트")
     print("-" * 50)
     
     try:
-        styler = ResponseStyler()
+        from core.agent_processor import ToolCallingAgentProcessor
         
-        test_responses = [
-            ("배송비는 5만원 이상 주문시 무료입니다.", "friendly"),
-            ("주문번호 ORD20241201001의 상태는 배송중입니다.", "informative"),
-            ("죄송합니다. 해당 정보를 찾을 수 없습니다.", "apologetic")
+        agent = ToolCallingAgentProcessor()
+        
+        test_queries = [
+            "배송비는 얼마인가요?",
+            "주문번호 ORD20241201001 상태 확인해주세요",
+            "운송장번호 123456789012 배송 현황 알려주세요",
+            "내 이름과 주문 상태를 알려주세요"  # 복합 질문
         ]
         
-        for response, tone_str in test_responses:
-            from core.response_styler import ResponseTone
-            tone = ResponseTone(tone_str)
-            styled = styler.style_response(response, tone, include_greeting=True)
-            
-            print(f"원본: {response}")
-            print(f"스타일링: {styled}")
+        for query in test_queries:
+            print(f"\n질문: {query}")
+            result = agent.process_query(query, user_id=1, session_id="test_session")
+            print(f"답변: {result['response'][:200]}...")
+            print(f"방법: {result.get('method', 'unknown')}")
+            if result.get('tools_used'):
+                print(f"사용된 도구: {', '.join(result['tools_used'])}")
             print()
             
     except Exception as e:
-        print(f"❌ 응답 스타일러 테스트 실패: {e}")
+        print(f"❌ Tool Calling Agent 테스트 실패: {e}")
+
+def test_langchain_tools():
+    """LangChain Tools 테스트"""
+    print("🔧 LangChain Tools 테스트")
+    print("-" * 50)
+    
+    try:
+        from core.langchain_tools import (
+            RAGSearchTool, OrderLookupTool, DeliveryTrackingTool,
+            ProductSearchTool, GeneralResponseTool
+        )
+        
+        # RAG 검색 도구 테스트
+        rag_tool = RAGSearchTool()
+        result = rag_tool._run("배송비는 얼마인가요?")
+        print(f"RAG 검색 결과: {result[:100]}...")
+        
+        # 주문 조회 도구 테스트
+        order_tool = OrderLookupTool()
+        result = order_tool._run("ORD20241201001")
+        print(f"주문 조회 결과: {result[:100]}...")
+        
+        # 배송 추적 도구 테스트
+        delivery_tool = DeliveryTrackingTool()
+        result = delivery_tool._run("123456789012")
+        print(f"배송 추적 결과: {result[:100]}...")
+        
+        print("✅ 모든 도구 테스트 완료")
+        
+    except Exception as e:
+        print(f"❌ LangChain Tools 테스트 실패: {e}")
 
 def main():
     """메인 테스트 함수"""
-    print("🧪 챗봇 시스템 통합 테스트")
+    print("🧪 시스템 통합 테스트")
     print("=" * 60)
     
     try:
-        test_intent_classifier()
         test_rag_processor()
         test_db_query_engine()
         test_delivery_api()
-        test_response_styler()
+        test_langchain_tools()
+        test_tool_calling_agent()
         
         print("✅ 모든 테스트 완료!")
+        return 0
         
     except Exception as e:
         print(f"❌ 테스트 중 오류 발생: {e}")
         return 1
-    
-    return 0
 
 if __name__ == "__main__":
     exit(main())

@@ -61,6 +61,14 @@ python scripts/simple_db_init.py
 
 # 문서 임베딩
 python scripts/simple_embed.py
+
+# 시스템 테스트 (선택사항)
+python scripts/test_system.py
+```
+
+### 6. 웹 애플리케이션 실행
+```bash
+streamlit run app/unified_chatbot.py
 ```
 
 ---
@@ -315,3 +323,22 @@ streamlit run app/unified_chatbot.py --logger.level=debug
 - LangSmith 대시보드 활용
 - 성능 메트릭 수집
 - 사용자 피드백 분석
+
+## 🧪 시스템 테스트
+
+### 통합 테스트 실행
+전체 시스템이 정상 작동하는지 확인:
+```bash
+python scripts/test_system.py
+```
+
+### 테스트 항목
+- **RAG 프로세서**: 문서 검색 및 응답 생성
+- **데이터베이스**: 주문/사용자 정보 조회
+- **배송 API**: 실제 배송 추적 기능
+- **LangChain Tools**: 개별 도구 기능
+- **Tool Calling Agent**: 전체 에이전트 시스템
+
+### 테스트 결과 해석
+- ✅ 성공: 해당 기능 정상 작동
+- ❌ 실패: 오류 메시지 확인 후 해당 섹션 트러블슈팅 참조
