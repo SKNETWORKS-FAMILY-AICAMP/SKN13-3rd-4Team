@@ -196,25 +196,22 @@ class DeliveryAPIWrapper:
         ]
     
     def format_delivery_info(self, delivery_info: Dict[str, Any]) -> str:
-        """배송 정보를 사용자 친화적 형식으로 포맷팅"""
+        """배송 정보를 사용자 친화적 형식으로 포맷팅 (매우 간결 버전)"""
         if not delivery_info:
             return "배송 정보를 찾을 수 없습니다."
-        
-        result = f"📦 **배송 추적 정보**\n\n"
-        result += f"🚚 **운송장번호:** {delivery_info['tracking_number']}\n"
-        result += f"🏢 **택배사:** {delivery_info['carrier']}\n"
-        result += f"📍 **현재 상태:** {delivery_info['status']}\n"
-        result += f"🌍 **현재 위치:** {delivery_info['current_location']}\n"
-        result += f"🕐 **마지막 업데이트:** {delivery_info['last_update']}\n"
-        result += f"👤 **수취인:** {delivery_info['recipient']}\n\n"
-        
-        # 배송 이력
-        if delivery_info.get('tracking_details'):
-            result += "📋 **배송 이력:**\n"
-            for detail in delivery_info['tracking_details']:
-                result += f"• {detail['time']} - {detail['location']}: {detail['status']}\n"
-        
-        return result
+
+        # 핵심 정보만 한 줄로 제공
+        status = delivery_info['status']
+        location = delivery_info['current_location']
+
+        if status == '배송완료':
+            return f"✅ 배송완료되었습니다."
+        elif status == '배송중':
+            return f"🚚 배송중입니다. (현재 위치: {location})"
+        elif status == '주문확인':
+            return f"📋 주문이 확인되었습니다. 곧 배송 준비가 시작됩니다."
+        else:
+            return f"📦 {status} 상태입니다."
     
     def get_delivery_status_by_order(self, order: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """주문 정보로 배송 상태 조회"""
