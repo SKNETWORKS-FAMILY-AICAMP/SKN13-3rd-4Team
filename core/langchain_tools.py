@@ -60,13 +60,12 @@ class OrderLookupInput(BaseModel):
 class OrderLookupTool(BaseTool):
     """주문 정보 조회 도구"""
     name: str = "order_lookup"
-    description: str = """주문 상태, 주문 내역, 사용자 정보를 조회합니다.
+    description: str = """주문 상태, 주문 내역을 조회합니다.
     다음과 같은 질문에 사용하세요:
     - 주문 내역 조회 (내 주문, 주문 내역, 구매 내역 등)
     - 주문 상태 확인 (특정 주문번호가 있는 경우)
     - 최근 주문 내역 조회 (전화번호가 있는 경우)
-    - 사용자 정보 조회 (내가 누구, 내 정보, 회원 정보, 프로필 등)
-    - 로그인한 사용자의 기본 정보 확인"""
+    - 사용자가 명시적으로 '내 정보', '회원 정보', '프로필', '내가 누구'를 요청할 때만 사용하세요."""
     args_schema: type = OrderLookupInput
 
     def __init__(self, **kwargs):
@@ -103,33 +102,35 @@ class OrderLookupTool(BaseTool):
                     return f"사용자 ID {user_id}에 해당하는 사용자를 찾을 수 없습니다."
 
             else:
-                # 매개변수가 없는 경우, 현재 사용자의 정보 또는 주문 내역 조회 시도
+                # 매개변수가 없는 경우, 현재 사용자의 주문 내역 조회
                 if self._current_user_id:
                     try:
                         user_id_int = int(self._current_user_id)
 
-                        # 먼저 사용자 기본 정보 조회
+                        # 사용자 기본 정보 조회 (간단하게)
                         user = self._db_engine.get_user_by_id(user_id_int)
                         if user:
-                            user_info = self._db_engine.format_user_info(user)
-
-                            # 최근 주문 내역도 함께 제공
-                            orders = self._db_engine.get_user_orders(user_id_int, limit=3)
+                            # 주문 내역 위주로 제공
+                            orders = self._db_engine.get_user_orders(user_id_int, limit=5)
                             if orders:
-                                order_summary = f"\n\n📦 **최근 주문 내역** (최근 3건)\n"
+                                result = f"📦 **{user['username']}님의 주문 내역**\n\n"
                                 for i, order in enumerate(orders, 1):
-                                    order_summary += f"{i}. {order['order_id']} - {order['status']} ({order['order_date']})\n"
-                                user_info += order_summary
+                                    result += f"{i}. {order['order_id']} - {order['status']} ({order['order_date']})\n"
+                                    if order.get('items'):
+                                        item_names = [item['product_name'] for item in order['items'][:2]]
+                                        if len(order['items']) > 2:
+                                            item_names.append(f"외 {len(order['items'])-2}개")
+                                        result += f"   상품: {', '.join(item_names)}\n"
+                                    result += f"   금액: {order['total_amount']:,}원\n\n"
+                                return result
                             else:
-                                user_info += "\n\n📦 **주문 내역**: 아직 주문이 없습니다."
-
-                            return user_info
+                                return f"📦 **{user['username']}님의 주문 내역**\n\n아직 주문이 없습니다."
                         else:
                             return "사용자 정보를 찾을 수 없습니다."
                     except (ValueError, TypeError):
                         pass
 
-                return "주문 조회를 위해서는 주문번호, 전화번호, 또는 사용자 ID 중 하나가 필요합니다. 로그인하신 경우 '내 정보' 또는 '내 주문 내역'을 확인할 수 있습니다."
+                return "주문 조회를 위해서는 주문번호나 전화번호가 필요합니다. 또는 로그인 후 이용해주세요."
 
         except Exception as e:
             return f"주문 조회 중 오류가 발생했습니다: {str(e)}"
@@ -194,24 +195,17 @@ class DeliveryTrackingTool(BaseTool):
                     user_id_int = int(self._current_user_id)
                     orders = self._db_engine.get_user_orders(user_id_int)
 
-                    print(f"🔍 디버그: 사용자 ID {user_id_int}, 상품명 '{product_name}' 검색")
-                    print(f"🔍 디버그: 총 {len(orders)}개 주문 조회됨")
-
                     # 상품명이 포함된 주문 찾기
                     matching_order = None
                     for order in orders:
-                        print(f"🔍 디버그: 주문 {order['order_id']} 확인 중")
                         for item in order.get('items', []):
-                            print(f"🔍 디버그: 상품 '{item['product_name']}' vs 검색어 '{product_name}'")
                             if product_name.lower() in item['product_name'].lower():
-                                print(f"✅ 디버그: 매칭된 상품 발견!")
                                 matching_order = order
                                 break
                         if matching_order:
                             break
 
                     if matching_order:
-                        print(f"✅ 디버그: 매칭된 주문 {matching_order['order_id']} 발견")
                         # 해당 주문의 배송 정보 조회
                         delivery_info = self._delivery_api.get_delivery_status_by_order(matching_order)
                         if delivery_info:
@@ -219,13 +213,7 @@ class DeliveryTrackingTool(BaseTool):
                         else:
                             return f"'{product_name}' 상품의 배송 정보를 조회할 수 없습니다."
                     else:
-                        print(f"❌ 디버그: '{product_name}' 상품을 포함한 주문을 찾을 수 없습니다.")
-                        # 사용자의 모든 상품 목록 출력 (디버깅용)
-                        all_products = []
-                        for order in orders:
-                            for item in order.get('items', []):
-                                all_products.append(item['product_name'])
-                        return f"'{product_name}' 상품을 포함한 주문을 찾을 수 없습니다.\n\n현재 주문하신 상품들: {', '.join(all_products)}"
+                        return f"'{product_name}' 상품을 포함한 주문을 찾을 수 없습니다."
 
                 except (ValueError, TypeError):
                     return "사용자 정보를 확인할 수 없습니다."
