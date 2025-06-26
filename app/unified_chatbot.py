@@ -170,13 +170,23 @@ def main():
         
         **세션 ID:** `{st.session_state.session_id[:8]}...`
         """)
-
-        if st.button("🔄 대화 기록 초기화"):
-            st.session_state.chat_history = []
-            # Agent 모드의 대화 기록도 초기화
-            if hasattr(chatbot, '_agent_processor') and chatbot._agent_processor:
+        chatbot = st.session_state.get("chatbot", None) 
+        # if st.button("🔄 대화 기록 초기화"):
+        #     st.session_state.chat_history = []
+        #     # Agent 모드의 대화 기록도 초기화
+        #     if hasattr(chatbot, '_agent_processor') and chatbot._agent_processor:
+        #         chatbot._agent_processor.clear_chat_history()
+        #     st.rerun()
+        if st.sidebar.button("🧹 대화기록 초기화"):
+            chatbot = st.session_state.get("chatbot", None)
+            if chatbot and hasattr(chatbot, "_agent_processor"):
                 chatbot._agent_processor.clear_chat_history()
-            st.rerun()
+
+            # Streamlit 렌더링용 대화기록도 초기화
+            st.session_state.chat_history = []
+
+
+
 
     # 메인 화면
     st.title("🤖 통합 RAG 기반 쇼핑몰 챗봇")
