@@ -44,25 +44,16 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 ## 3. 핵심 특징
 
 ###  지능형 Tool Calling Agent
->>>>>>> c67f8afe47a7f87fe87b568f21d1f02f0ced2f52
 - **자동 도구 선택**: LLM이 질문을 분석하여 적절한 도구를 자동 선택
 - **단일 처리 방식**: 하나의 Agent로 모든 유형의 질문 처리
 - **복합 질문 처리**: Batch 처리를 통한 다중 작업 병렬 실행
 
-<<<<<<< HEAD
-### ⚡ 시스템 장점
-=======
 ###  시스템 장점
->>>>>>> c67f8afe47a7f87fe87b568f21d1f02f0ced2f52
 - **비용 효율성**: GPT-4o-mini 사용으로 GPT-4 대비 60% 비용 절약
 - **실시간 연동**: 실제 배송 추적 API와 연동된 정확한 정보 제공
 - **고속 검색**: Chroma Vector DB를 통한 밀리초 단위 FAQ/상품 검색
 
-<<<<<<< HEAD
-## 🛠️ 기술 스택
-=======
 ## 4. 기술 스택
->>>>>>> c67f8afe47a7f87fe87b568f21d1f02f0ced2f52
 
 | 분야 | 기술 | 용도 |
 |------|------|------|
@@ -73,11 +64,7 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 | **Framework** | Streamlit, LangChain | 웹 UI 및 AI 에이전트 |
 | **API** | 스마트택배 배송 추적 API | 실시간 배송 정보 |
 
-<<<<<<< HEAD
-## 🏗️ 시스템 아키텍처
-=======
 ## 5. 시스템 아키텍처
->>>>>>> c67f8afe47a7f87fe87b568f21d1f02f0ced2f52
 
 ### 전체 구조도
 ```
@@ -99,12 +86,6 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 │ (FAQ/상품)  │    │ (주문/사용자)│    │ (배송추적)  │
 └─────────────┘    └─────────────┘    └─────────────┘
 ```
-<<<<<<< HEAD
-
-### 핵심 컴포넌트
-
-#### 🧠 AI 처리 계층
-=======
 ###  챗봇 처리 플로우  
 ![챗봇 처리 흐름](챗봇_설명.png)
 
@@ -113,7 +94,6 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 ### 핵심 컴포넌트
 
 #### AI 처리 계층
->>>>>>> c67f8afe47a7f87fe87b568f21d1f02f0ced2f52
 - **Tool Calling Agent**: 질문 분석 후 적절한 도구 자동 선택
 - **Batch Processor**: 복합 질문을 여러 작업으로 분해하여 병렬 처리
 - **Response Styler**: 응답 톤앤매너 조정 및 이모지 적용
@@ -123,22 +103,15 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 - **DB Query Engine**: SQLite를 통한 사용자/주문 데이터 조회
 - **Delivery API Wrapper**: 실제 택배사 API 연동
 
-<<<<<<< HEAD
-#### 🛠️ 도구 계층 (LangChain Tools)
-=======
+
 ####  도구 계층 (LangChain Tools)
->>>>>>> c67f8afe47a7f87fe87b568f21d1f02f0ced2f52
 1. **RAGSearchTool**: FAQ, 제품 정보 벡터 검색
 2. **OrderLookupTool**: 주문 내역, 사용자 정보 조회
 3. **DeliveryTrackingTool**: 배송 추적 (실제 API 연동)
 4. **ProductSearchTool**: 상품 검색 및 정보 조회
 5. **GeneralResponseTool**: 일반 대화 응답
 
-<<<<<<< HEAD
-## 🔄 워크플로우
-=======
 ## 6. 워크플로우
->>>>>>> c67f8afe47a7f87fe87b568f21d1f02f0ced2f52
 
 ### 1. 단순 질문 처리 플로우
 ```
@@ -167,7 +140,7 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 
 ### 4. 실제 처리 예시
 
-<<<<<<< HEAD
+![대화 예시](챗봇_예시_화면.png)
 #### 예시 1: FAQ 질문
 ```
 Input: "반품은 어떻게 하나요?"
@@ -175,22 +148,10 @@ Process: Agent → RAG Tool → Vector Search → FAQ 검색
 Output: "상품 수령 후 7일 이내 고객센터 연락..."
 ```
 
-#### 예시 2: 복합 질문
-```
-Input: "내 주문 상태와 배송 현황을 알려주세요"
-Process: Agent → Batch Mode → [Order Tool + Delivery Tool] → 결과 통합
-Output: "주문 상태: 배송중, 배송 현황: 대구 허브 도착..."
-```
-
-## 📊 성능 지표
-=======
-![대화 예시](챗봇_예시_화면.png)
-
 ---
 
 
 ## 7. 성능 지표
->>>>>>> c67f8afe47a7f87fe87b568f21d1f02f0ced2f52
 
 ### 응답 시간
 - **단순 질문**: 2-5초
@@ -209,11 +170,8 @@ Output: "주문 상태: 배송중, 배송 현황: 대구 허브 도착..."
 - **토큰 사용량**: 평균 500-1500 토큰/질문
 - **API 호출**: 질문당 1-3회
 
-<<<<<<< HEAD
-## 🎯 주요 장점
-=======
 ## 8. 주요 장점
->>>>>>> c67f8afe47a7f87fe87b568f21d1f02f0ced2f52
+## 🎯 주요 장점
 
 1. **단순성**: 하나의 Agent로 모든 질문 처리
 2. **효율성**: Batch 처리로 복합 질문 최적화
@@ -221,24 +179,20 @@ Output: "주문 상태: 배송중, 배송 현황: 대구 허브 도착..."
 4. **비용 효율성**: GPT-4o-mini 사용으로 비용 절약
 5. **실용성**: 실제 API 연동으로 현실적인 서비스 제공
 
-<<<<<<< HEAD
-## 📁 프로젝트 구조
+## 9. 프로젝트 구조
 
-```
-chatbot/
+```bash
+📁 SKN13-3rd-4Team/
 ├── app/
-│   └── unified_chatbot.py         # 🎯 메인 Streamlit 애플리케이션
+│   └── unified_chatbot.py           # ✅ Streamlit 기반 챗봇 프론트엔드
 ├── core/
-│   ├── agent_processor.py         # 🚀 Tool Calling Agent (메인 처리기)
-│   ├── langchain_tools.py         # LangChain Tool 래퍼들
-│   ├── rag_processor.py           # RAG 검색 처리기
-│   ├── db_query_engine.py         # 데이터베이스 쿼리 엔진
-│   ├── delivery_api_wrapper.py    # 배송 추적 API 래퍼
-│   └── response_styler.py         # 응답 스타일링
-├── data/
-│   ├── raw_docs/                  # 원본 문서 (JSON)
-│   ├── sample_db/                 # SQLite 데이터베이스
-│   └── vectordb_chroma/           # Chroma 벡터 데이터베이스
+│   ├── agent_processor.py           # ✅ Tool Calling Agent (도구 선택 + 실행 중심)
+│   ├── intent_classifier.py         # 의도 분석기
+│   ├── rag_processor.py             # RAG 기반 문서 응답 생성기
+│   ├── db_query_engine.py           # 사용자/주문/상품 DB 쿼리
+│   ├── delivery_api_wrapper.py      # 배송 추적 API 래퍼
+│   └── response_styler.py           # 응답 톤/이모지 스타일러
+├── langchain_tools.py              # LangChain Tool 정의 모듈 (agent가 사용할 tool 리스트)
 ├── db/
 │   └── schema.sql                 # 데이터베이스 스키마
 ├── scripts/
@@ -247,7 +201,6 @@ chatbot/
 │   ├── simple_embed.py            # 문서 임베딩 (RAG 프로세서 사용)
 │   └── test_system.py             # 통합 시스템 테스트
 └── docs/                          # 📚 문서
-=======
 ## 9. 프로젝트 구조
 
 ```bash
@@ -271,15 +224,10 @@ chatbot/
 │   └── project_cleanup_summary.md
 ├── data/
 │   └── raw_docs/*.json              # 샘플 FAQ/상품/주문/배송 데이터
->>>>>>> c67f8afe47a7f87fe87b568f21d1f02f0ced2f52
 ```
 ---
 
-<<<<<<< HEAD
-## ⚡ 빠른 시작
-=======
 ## 10. 빠른 시작
->>>>>>> c67f8afe47a7f87fe87b568f21d1f02f0ced2f52
 
 ### 1. 환경 설정
 ```bash
@@ -310,11 +258,7 @@ streamlit run app/unified_chatbot.py
 - **기본 모드**: Tool Calling Agent
 - **특별 기능**: Batch 처리 (복합 질문 자동 감지)
 
-<<<<<<< HEAD
-## 📚 문서
-=======
 ## 문서
->>>>>>> c67f8afe47a7f87fe87b568f21d1f02f0ced2f52
 
 - **[GUIDE.md](GUIDE.md)**: 상세한 설치, 사용법, 데이터 관리 및 트러블슈팅 가이드
 - **[docs/](docs/)**: 추가 기술 문서 및 아키텍처 정보

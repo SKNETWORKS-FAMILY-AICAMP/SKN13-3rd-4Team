@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -180,6 +179,7 @@ cython_debug/
 *.sqlite3
 
 # Vector database
+data/vector_store/
 data/vectordb_chroma/
 chroma.sqlite3
 
