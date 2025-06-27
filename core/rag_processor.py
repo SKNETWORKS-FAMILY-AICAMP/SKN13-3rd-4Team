@@ -163,7 +163,7 @@ class RAGProcessor:
                 keywords_text = ", ".join(keywords) if isinstance(keywords, list) else str(keywords)
                 
                 doc = Document(
-                    page_content=f"질문: {faq['question']}\n답변: {faq['answer']}",
+                    page_content=f"질문: {faq['question']}\n답변: {faq['answer']}\n키워드: {keywords_text}",
                     metadata={
                         "source": "faq",
                         "features": feature_text,
