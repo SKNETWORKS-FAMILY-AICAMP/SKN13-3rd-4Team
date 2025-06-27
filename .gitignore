@@ -222,7 +222,4 @@ Thumbs.db
 data/raw_docs/*.pdf
 data/raw_docs/*.docx
 data/processed_docs/*.json
-=======
-data/
-.env
->>>>>>> 98f88f8369a00fea011ba0112cbc9097e2eb5e55
+data/vector_store/*.*
