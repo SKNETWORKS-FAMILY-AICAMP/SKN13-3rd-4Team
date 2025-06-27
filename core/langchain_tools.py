@@ -364,3 +364,5 @@ if __name__ == "__main__":
     general_tool = GeneralResponseTool()
     result = general_tool._run("안녕하세요")
     print(f"일반 응답 결과: {result}")
+
+

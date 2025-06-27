@@ -538,8 +538,9 @@ class ToolCallingAgentProcessor:
             self.chat_history = self.chat_history[-20:]
     def _is_informative_query(self, text: str) -> bool:
         prompt = f"""
-        사용자가 입력한 텍스트가 의미 있는 질문(정보 요청, 명령, 질문 등)인지 판단해줘.
-        단순 인사, 감탄, 감정 표현("ㅋㅋ", "헐", "ㅇㅈ", "ㅎㅇ", "ㅂㅇ", "ㄹㅇ", "하이", "방가" 등)은 전부 "NO"로 답해줘.
+        아래 입력이 의미 있는 질문이나 정보 탐색 의도인지 판단해줘.
+        단어 하나라도 쇼핑몰 관련된 키워드면 YES로 답해.
+        단순 인사, 감탄, 감정 표현만 NO로 답해.
 
         입력: "{text}"
         의미 있는 질문입니까? (YES 또는 NO)
