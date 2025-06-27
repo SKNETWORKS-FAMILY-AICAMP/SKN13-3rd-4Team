@@ -154,13 +154,20 @@ class RAGProcessor:
                 faq_data = json.load(f)
             
             for faq in faq_data:
+                # 특징 정보 포맷팅
+                feats = faq.get('features', [])
+                feature_text = "\n".join(feats) if isinstance(feats, list) else str(feats)
+
+                # 키워드 정보 포맷팅
+                keywords = faq.get('keywords', [])
+                keywords_text = ", ".join(keywords) if isinstance(keywords, list) else str(keywords)
+                
                 doc = Document(
                     page_content=f"질문: {faq['question']}\n답변: {faq['answer']}",
                     metadata={
                         "source": "faq",
-                        "category": faq.get('category', ''),
-                        "faq_id": faq.get('faq_id', ''),
-                        "keywords": faq.get('keywords', '')
+                        "features": feature_text,
+                        "keywords": keywords_text
                     }
                 )
                 documents.append(doc)
@@ -188,19 +195,21 @@ class RAGProcessor:
             for product in product_data:
                 # 사양 정보 포맷팅
                 specs = product.get('specifications', {})
-                specs_text = ", ".join([f"{k}: {v}" for k, v in specs.items()]) if isinstance(specs, dict) else str(specs)
+                # specs_text = ", ".join([f"{k}: {v}" for k, v in specs.items()]) if isinstance(specs, dict) else str(specs)
+                specs_text = "\n".join(specs) if isinstance(specs, list) else str(specs)
                 
                 # 특징 정보 포맷팅
                 features = product.get('features', [])
-                features_text = ", ".join(features) if isinstance(features, list) else str(features)
+                # features_text = ", ".join(features) if isinstance(features, list) else str(features)
+                features_text = "\n".join(features) if isinstance(features, list) else str(features)
                 
                 doc = Document(
-                    page_content=f"상품명: {product['name']}\n설명: {product['description']}\n사양: {specs_text}\n특징: {features_text}\n가격: {product['price']:,}원",
+                    page_content=f"상품명: {product['name']}\n카테고리: {product['category']}\n키워드: {product['keywords']}\n설명: {product['description']}\n특징: {features_text}\n가격: {product['price']}원",
                     metadata={
                         "source": "product",
                         "product_id": product.get('product_id', ''),
-                        "category": product.get('category', ''),
                         "price": product.get('price', 0),
+                        "category": product.get('category', '기타'),
                         "keywords": str(product.get('keywords', ''))
                     }
                 )

@@ -20,7 +20,7 @@ load_dotenv()
 class ToolCallingAgentProcessor:
     """Tool Calling Agent 기반 쿼리 프로세서"""
 
-    def __init__(self, model_name: str = "gpt-4o-mini", temperature: float = 0.1):
+    def __init__(self, model_name: str = "gpt-4.1", temperature: float = 0.1):
         self.response_styler = ResponseStyler()
         """
         Args:
@@ -98,18 +98,20 @@ class ToolCallingAgentProcessor:
 1. rag_search: FAQ, 제품 정보, 정책 등에 대한 질문 답변
 2. order_lookup: 주문 상태, 주문 내역, 사용자 정보 조회
 3. delivery_tracking: 배송 추적 및 배송 정보 제공
-4. product_search: 상품 검색 및 상품 정보 제공
+4. product_search: 사용자의 상품 검색 및 상품 정보 제공
 5. general_response: 일반적인 인사, 자기소개, 간단한 대화 응답
 
 도구 선택 가이드라인:
 - 자기소개, 이름, 기능 문의 → general_response
 - 인사, 감사 인사, 일반 대화 → general_response
-- 배송비, 반품, 교환 등 정책 질문 → rag_search
-- 제품 사양, 특징 등 제품 정보 → rag_search 또는 product_search
+- 배송비, 반품, 교환 등 FAQ 관련 질문 -> rag_search
+- "셔츠 추천", "유사한 하의", "더 저렴한 제품" 등 특정 제품 관련 문의 → rag_search
+- 제품 사양, 특징 등 제품 정보 → rag_search 이후 product_search
 - 주문 내역, 내 주문, 구매 내역, 주문 상태 → order_lookup
 - 사용자 정보, "내가 누구", "내 정보", "회원 정보", "프로필" → order_lookup
 - 배송 추적, 배송 상태, "내 [상품명] 어디까지왔어?" → delivery_tracking
-- 상품 검색, 가격 확인 → product_search
+- 사용자가 주문한 상품, 가격 확인 → product_search
+
 
 응답 가이드라인:
 1. 항상 친근하고 정중한 어조 사용
@@ -125,7 +127,7 @@ class ToolCallingAgentProcessor:
 - 주문번호, 운송장번호 등이 언급되면 해당 도구를 우선 사용
 - 로그인한 사용자의 주문 내역 조회 시 order_lookup 도구가 자동으로 현재 사용자 정보 활용
 - 여러 도구가 필요한 경우 순차적으로 사용
-- 도구 사용 실패 시 대안 제시
+- 도구 사용 실패 시 다른 도구로 대체 시도
 - 항상 고객의 입장에서 생각하여 응답
 - 단순한 인사나 질문도 general_response 도구를 통해 처리"""
     
