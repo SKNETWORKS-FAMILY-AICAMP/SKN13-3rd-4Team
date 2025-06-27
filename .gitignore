@@ -222,3 +222,4 @@ Thumbs.db
 data/raw_docs/*.pdf
 data/raw_docs/*.docx
 data/processed_docs/*.json
+data/vector_store/*.*

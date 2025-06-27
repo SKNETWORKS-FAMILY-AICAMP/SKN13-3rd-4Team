@@ -103,6 +103,7 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 - **DB Query Engine**: SQLite를 통한 사용자/주문 데이터 조회
 - **Delivery API Wrapper**: 실제 택배사 API 연동
 
+
 ####  도구 계층 (LangChain Tools)
 1. **RAGSearchTool**: FAQ, 제품 정보 벡터 검색
 2. **OrderLookupTool**: 주문 내역, 사용자 정보 조회
@@ -140,6 +141,12 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 ### 4. 실제 처리 예시
 
 ![대화 예시](챗봇_예시_화면.png)
+#### 예시 1: FAQ 질문
+```
+Input: "반품은 어떻게 하나요?"
+Process: Agent → RAG Tool → Vector Search → FAQ 검색
+Output: "상품 수령 후 7일 이내 고객센터 연락..."
+```
 
 ---
 
@@ -164,6 +171,7 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 - **API 호출**: 질문당 1-3회
 
 ## 8. 주요 장점
+## 🎯 주요 장점
 
 1. **단순성**: 하나의 Agent로 모든 질문 처리
 2. **효율성**: Batch 처리로 복합 질문 최적화
@@ -171,6 +179,28 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 4. **비용 효율성**: GPT-4o-mini 사용으로 비용 절약
 5. **실용성**: 실제 API 연동으로 현실적인 서비스 제공
 
+## 9. 프로젝트 구조
+
+```bash
+📁 SKN13-3rd-4Team/
+├── app/
+│   └── unified_chatbot.py           # ✅ Streamlit 기반 챗봇 프론트엔드
+├── core/
+│   ├── agent_processor.py           # ✅ Tool Calling Agent (도구 선택 + 실행 중심)
+│   ├── intent_classifier.py         # 의도 분석기
+│   ├── rag_processor.py             # RAG 기반 문서 응답 생성기
+│   ├── db_query_engine.py           # 사용자/주문/상품 DB 쿼리
+│   ├── delivery_api_wrapper.py      # 배송 추적 API 래퍼
+│   └── response_styler.py           # 응답 톤/이모지 스타일러
+├── langchain_tools.py              # LangChain Tool 정의 모듈 (agent가 사용할 tool 리스트)
+├── db/
+│   └── schema.sql                 # 데이터베이스 스키마
+├── scripts/
+│   ├── README.md                  # 스크립트 사용 가이드
+│   ├── simple_db_init.py          # 데이터베이스 초기화
+│   ├── simple_embed.py            # 문서 임베딩 (RAG 프로세서 사용)
+│   └── test_system.py             # 통합 시스템 테스트
+└── docs/                          # 📚 문서
 ## 9. 프로젝트 구조
 
 ```bash
