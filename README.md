@@ -9,7 +9,7 @@
 고객 질문 하나에 AI가 **자동 검색 + 문서 분석 + 자연어 응답**을 연결하는,  
 **Tool Calling 기반의 지능형 RAG 챗봇**입니다.
 
-## 1.2 주제 선정 배경  
+## 주제 선정 배경  
 
 국내 전자상거래 시장은 2023년 기준 약 **227조 원 규모**로, 최근 몇 년간 연평균 10% 이상의 성장률을 기록하고 있습니다.  
 ➡️ **출처**: [통계청, 온라인쇼핑동향(2023년 연간)](https://kostat.go.kr/board/view.do?bSeq=&aSeq=436945&page=1&rowPerPage=10&boardSeq=580&searchType=null&searchWord=null)
@@ -64,7 +64,34 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 | **Framework** | Streamlit, LangChain | 웹 UI 및 AI 에이전트 |
 | **API** | 스마트택배 배송 추적 API | 실시간 배송 정보 |
 
-## 5. 시스템 아키텍처
+---
+
+## 5. 프로젝트 구조
+
+```bash
+📁 SKN13-3rd-4Team/
+├── app/
+│   └── unified_chatbot.py           # ✅ Streamlit 기반 챗봇 프론트엔드
+├── core/
+│   ├── agent_processor.py           # ✅ Tool Calling Agent (도구 선택 + 실행 중심)
+│   ├── intent_classifier.py         # 의도 분석기
+│   ├── rag_processor.py             # RAG 기반 문서 응답 생성기
+│   ├── db_query_engine.py           # 사용자/주문/상품 DB 쿼리
+│   ├── delivery_api_wrapper.py      # 배송 추적 API 래퍼
+│   └── response_styler.py           # 응답 톤/이모지 스타일러
+├── langchain_tools.py              # LangChain Tool 정의 모듈 (agent가 사용할 tool 리스트)
+├── db/
+│   └── schema.sql                   # 데이터베이스 스키마
+├── scripts/
+│   ├── README.md                    # 스크립트 사용 가이드
+│   ├── simple_db_init.py            # 데이터베이스 초기화
+│   ├── simple_embed.py              # 문서 임베딩 (RAG 프로세서 사용)
+│   └── test_system.py               # 통합 시스템 테스트
+└── docs/                            # 📚 문서
+```
+
+---
+## 6. 시스템 아키텍처
 
 ### 전체 구조도
 ```
@@ -86,6 +113,7 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 │ (FAQ/상품)  │    │ (주문/사용자)│    │ (배송추적)  │
 └─────────────┘    └─────────────┘    └─────────────┘
 ```
+
 ###  챗봇 처리 플로우  
 ![챗봇 처리 흐름](챗봇_설명.png)
 
@@ -111,7 +139,160 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 4. **ProductSearchTool**: 상품 검색 및 정보 조회
 5. **GeneralResponseTool**: 일반 대화 응답
 
-## 6. 워크플로우
+## 7. 데이터 수집 및 전처리 
+### 1. 수집 대상
+- **FAQ 데이터**
+  - 수집후 가공하여 JSON 파일로 저장
+  - 파일 위치: `data/raw_docs/faq_data.json`
+- **상품 정보 데이터**
+  - 수집후 가공하여 JSON 파일로 저장
+  - 파일 위치: `data/raw_docs/product_info.json`
+---
+
+### 크롤링 데이터 예시 
+```html
+<div class="godsInfo-area">
+  ...
+  <h2 class="brand-name">
+      <a href="/brand-link">8 seconds</a>
+  </h2>
+  <div class="gods-name" id="goodDtlTitle">
+      코튼 경량 세미와이드 팬츠 - 아이보리
+  </div>
+  <div class="price-info">
+      <span class="gods-price">
+          <span class="cost">
+              <del>49,900</del>
+          </span>
+      </span>
+  </div>
+  <div class="gods-about">
+      <p class="about-desc">
+          구멍으로 패턴을 연출한 사랑스러운 스카시 짜임이 돋보이는 카디건입니다.
+      </p>
+      ...
+      <dt>소재정보</dt>
+      <dd>
+          겉감 : 아크릴 77%, 나일론 23%.
+      </dd>
+      ...
+      <th>착용시기</th>
+      <td>봄</td>
+      <td class="on">여름</td>
+      <td>가을</td>
+      <td>겨울</td>
+      ...
+```
+### 2.전처리 과정
+- **JSON 파일 로드**
+    ```python
+    with open(faq_path, 'r', encoding='utf-8') as f:
+        faq_data = json.load(f)
+    ```
+
+- 각 FAQ 문서의 내용을 아래와 같이 문자열로 만듭니다:
+    ```
+    질문: {질문 텍스트}
+    답변: {답변 텍스트}
+    ```
+
+- 코드 예시:
+    ```python
+    for faq in faq_data:
+        doc = Document(
+            page_content=f"질문: {faq['question']}\n답변: {faq['answer']}",
+            metadata={
+                "source": "faq",
+                "category": faq['category'],
+                "faq_id": faq.get('faq_id', faq.get('id', 'unknown')),
+                "keywords": faq.get('keywords', '')
+            }
+        )
+    ```
+- 텍스트 정제:
+    - 개행문자 제거
+    - 양 끝 공백 제거
+    ```python
+    body = content.replace("\n", " ").strip()
+    ```
+
+### **상품 정보 전처리**
+상품 정보 문서는 아래와 같이 처리됩니다:
+
+- **JSON 파일 로드**
+    ```python
+    with open(product_path, 'r', encoding='utf-8') as f:
+        product_data = json.load(f)
+    ```
+
+- 각 상품 정보를 하나의 문자열로 변환
+    - 포함 항목:
+        - 상품명
+        - 설명
+        - 사양 (specifications)
+        - 특징 (features)
+        - 가격
+
+- 사양, 특징은 문자열로 이어붙임:
+    ```python
+    specs_text = ", ".join([f"{k}: {v}" for k, v in specs.items()])
+    features_text = ", ".join(features)
+    ```
+
+- 최종적으로 아래와 같이 page_content를 생성:
+    ```
+    상품명: 무선 이어폰 Pro
+    설명: 고품질 무선 이어폰으로 노이즈 캔슬링 기능과 긴 배터리 수명을 자랑합니다.
+    사양: 배터리: 최대 24시간, 연결: 블루투스 5.0, 방수: IPX4
+    특징: 노이즈 캔슬링, 터치 컨트롤, 고속 충전
+    가격: 89,000원
+    ```
+
+- 코드 예시:
+    ```python
+    doc = Document(
+        page_content=(
+            f"상품명: {product['name']}\n"
+            f"설명: {product['description']}\n"
+            f"사양: {specs_text}\n"
+            f"특징: {features_text}\n"
+            f"가격: {product['price']:,}원"
+        ),
+        metadata={
+            "source": "product",
+            "product_id": product['product_id'],
+            "category": product['category'],
+            "price": product['price'],
+            "keywords": str(product.get('keywords', ''))
+        }
+    )
+    ```
+
+### ✅ Keyword 전처리
+
+- keywords 필드는 metadata에만 들어가 있었음
+- 따라서 검색 hit율이 낮았음
+- 개선 방안 (제안):
+    - keywords를 page_content에 포함해야 한다
+
+### ✅ 저장 방식
+
+- FAQ와 Product 모두 Chroma Vector Store에 저장됩니다:
+    ```python
+    vectorstore = Chroma.from_documents(
+        documents=documents,
+        embedding=embeddings,
+        persist_directory=str(vector_db_path)
+    )
+    ```
+- `metadata`는 검색용이 아닌, 결과 출력용으로 활용됨
+
+### ✅ 전처리 결과
+
+- FAQ와 상품 정보를 벡터화하여 Vector DB에 저장
+- 검색 효율 향상
+---
+## 8. 워크플로우
 
 ### 1. 단순 질문 처리 플로우
 ```
@@ -151,7 +332,7 @@ Output: "상품 수령 후 7일 이내 고객센터 연락..."
 ---
 
 
-## 7. 성능 지표
+## 9. 성능 지표
 
 ### 응답 시간
 - **단순 질문**: 2-5초
@@ -162,15 +343,15 @@ Output: "상품 수령 후 7일 이내 고객센터 연락..."
 
 ### 정확도
 - **도구 선택**: 95% 이상 적절한 도구 선택
-- **RAG 검색**: 90% 이상 관련 정보 검색
+- **RAG 검색**: 약 80~90% 정확도 (keywords가 page_content에 포함되지 않을 경우 검색률이 저하될 수 있음)
 - **배송 추적**: 실제 API 연동으로 100% 정확
 
 ### 비용 효율성
-- **GPT-4o-mini**: GPT-4 대비 60% 절약
+- **GPT-4o-mini**: GPT-4 대비 60% 절약(RAG 활용으로 API 호출 최소화)
 - **토큰 사용량**: 평균 500-1500 토큰/질문
 - **API 호출**: 질문당 1-3회
 
-## 8. 주요 장점
+## 10. 주요 장점
 ## 🎯 주요 장점
 
 1. **단순성**: 하나의 Agent로 모든 질문 처리
@@ -178,53 +359,8 @@ Output: "상품 수령 후 7일 이내 고객센터 연락..."
 3. **확장성**: 새로운 도구 쉽게 추가 가능
 4. **비용 효율성**: GPT-4o-mini 사용으로 비용 절약
 5. **실용성**: 실제 API 연동으로 현실적인 서비스 제공
+6. **검색 품질 개선 가능성**: keywords를 page_content에 포함하여 RAG 검색 정확도를 높일 수 있음
 
-## 9. 프로젝트 구조
-
-```bash
-📁 SKN13-3rd-4Team/
-├── app/
-│   └── unified_chatbot.py           # ✅ Streamlit 기반 챗봇 프론트엔드
-├── core/
-│   ├── agent_processor.py           # ✅ Tool Calling Agent (도구 선택 + 실행 중심)
-│   ├── intent_classifier.py         # 의도 분석기
-│   ├── rag_processor.py             # RAG 기반 문서 응답 생성기
-│   ├── db_query_engine.py           # 사용자/주문/상품 DB 쿼리
-│   ├── delivery_api_wrapper.py      # 배송 추적 API 래퍼
-│   └── response_styler.py           # 응답 톤/이모지 스타일러
-├── langchain_tools.py              # LangChain Tool 정의 모듈 (agent가 사용할 tool 리스트)
-├── db/
-│   └── schema.sql                 # 데이터베이스 스키마
-├── scripts/
-│   ├── README.md                  # 스크립트 사용 가이드
-│   ├── simple_db_init.py          # 데이터베이스 초기화
-│   ├── simple_embed.py            # 문서 임베딩 (RAG 프로세서 사용)
-│   └── test_system.py             # 통합 시스템 테스트
-└── docs/                          # 📚 문서
-## 9. 프로젝트 구조
-
-```bash
-📁 SKN13-3rd-4Team/
-├── app/
-│   └── unified_chatbot.py           # ✅ Streamlit 기반 챗봇 프론트엔드
-├── core/
-│   ├── agent_processor.py           # ✅ Tool Calling Agent (도구 선택 + 실행 중심)
-│   ├── intent_classifier.py         # 의도 분석기
-│   ├── rag_processor.py             # RAG 기반 문서 응답 생성기
-│   ├── db_query_engine.py           # 사용자/주문/상품 DB 쿼리
-│   ├── delivery_api_wrapper.py      # 배송 추적 API 래퍼
-│   └── response_styler.py           # 응답 톤/이모지 스타일러
-├── langchain_tools.py              # LangChain Tool 정의 모듈 (agent가 사용할 tool 리스트)
-├── db/
-│   ├── schema.sql                   # DB 테이블 정의
-│   └── init_db.py                   # 샘플 데이터 초기화 스크립트
-├── docs/
-│   ├── code_review_and_architecture.md
-│   ├── langsmith_setup.md
-│   └── project_cleanup_summary.md
-├── data/
-│   └── raw_docs/*.json              # 샘플 FAQ/상품/주문/배송 데이터
-```
 ---
 
 ## 10. 빠른 시작
