@@ -36,8 +36,10 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 - FAQ, 상품설명, 정책 안내 등 다양한 정보를 통합 응대  
 - 사람과 대화하듯 매끄러운 인터랙션 제공
 
-2️⃣ **RAG 기반 LLM 챗봇 구축** 
-![프로젝트 목표](목표.png)
+2️⃣ **RAG 기반 LLM 챗봇 구축**  
+
+<img src="https://raw.githubusercontent.com/SKNETWORKS-FAMILY-AICAMP/SKN13-3rd-4Team/main/images/rag_llm.png" width="500"/>
+
 
 ---
 
@@ -74,7 +76,6 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 │   └── unified_chatbot.py           # ✅ Streamlit 기반 챗봇 프론트엔드
 ├── core/
 │   ├── agent_processor.py           # ✅ Tool Calling Agent (도구 선택 + 실행 중심)
-│   ├── intent_classifier.py         # 의도 분석기
 │   ├── rag_processor.py             # RAG 기반 문서 응답 생성기
 │   ├── db_query_engine.py           # 사용자/주문/상품 DB 쿼리
 │   ├── delivery_api_wrapper.py      # 배송 추적 API 래퍼
@@ -95,49 +96,31 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 
 ### 전체 구조도
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   사용자 질문    │───▶│  Tool Calling   │───▶│   응답 생성     │
-│                │    │     Agent       │    │                │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                              │
-                              ▼
-                    ┌─────────────────┐
-                    │   도구 선택     │
-                    │   (자동 판단)   │
-                    └─────────────────┘
-                              │
-        ┌─────────────────────┼─────────────────────┐
-        ▼                     ▼                     ▼
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│ RAG 검색    │    │ DB 조회     │    │ API 호출    │
-│ (FAQ/상품)  │    │ (주문/사용자)│    │ (배송추적)  │
-└─────────────┘    └─────────────┘    └─────────────┘
+┌─────────────────┐      ┌────────────────────┐      ┌─────────────────┐
+│   사용자 질문    │ ───▶ │  Tool Calling Agent │ ───▶ │   응답 생성     │
+└─────────────────┘      └────────────────────┘      └─────────────────┘
+                                │
+                                ▼
+                      ┌────────────────────┐
+                      │     도구 선택       │
+                      │   (자동 Tool 호출)  │
+                      └────────────────────┘
+                                │
+        ┌──────────────┬──────────────┬──────────────┬──────────────┬──────────────┐
+        ▼              ▼              ▼              ▼              ▼
+┌────────────────┐┌────────────────┐┌────────────────────────┐┌────────────────────┐┌────────────────────────────┐
+│ RAG Search Tool ││ Order Lookup   ││ Delivery Tracking Tool││ Product Search Tool││ General Response Tool      │
+│ (FAQ/상품 검색) ││ Tool (주문 조회)││ (배송 상태 조회)       ││ (내 상품 정보 조회) ││ (일반 대화 처리)             │
+└────────────────┘└────────────────┘└────────────────────────┘└────────────────────┘└────────────────────────────┘
+
 ```
 
 ###  챗봇 처리 플로우  
-![챗봇 처리 흐름](챗봇_설명.png)
+
+<img src="https://raw.githubusercontent.com/SKNETWORKS-FAMILY-AICAMP/SKN13-3rd-4Team/main/images/chatbot.png" width="500"/>
+
 
 ※ 사용자의 질문이 실제 응답으로 이어지는 전 과정을 시각화한 흐름도입니다.
-
-### 핵심 컴포넌트
-
-#### AI 처리 계층
-- **Tool Calling Agent**: 질문 분석 후 적절한 도구 자동 선택
-- **Batch Processor**: 복합 질문을 여러 작업으로 분해하여 병렬 처리
-- **Response Styler**: 응답 톤앤매너 조정 및 이모지 적용
-
-#### 🔍 데이터 처리 계층
-- **RAG Processor**: Chroma 벡터 DB를 통한 FAQ/상품 정보 검색
-- **DB Query Engine**: SQLite를 통한 사용자/주문 데이터 조회
-- **Delivery API Wrapper**: 실제 택배사 API 연동
-
-
-####  도구 계층 (LangChain Tools)
-1. **RAGSearchTool**: FAQ, 제품 정보 벡터 검색
-2. **OrderLookupTool**: 주문 내역, 사용자 정보 조회
-3. **DeliveryTrackingTool**: 배송 추적 (실제 API 연동)
-4. **ProductSearchTool**: 상품 검색 및 정보 조회
-5. **GeneralResponseTool**: 일반 대화 응답
 
 ## 7. 데이터 수집 및 전처리 
 ### 1. 수집 대상
@@ -319,9 +302,10 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
     └─ 일반 대화 → General Response Tool
 ```
 
-### 4. 실제 처리 예시
+### 4. 챗봇 응답 예시
 
-![대화 예시](챗봇_예시_화면.png)
+<img src="https://raw.githubusercontent.com/SKNETWORKS-FAMILY-AICAMP/SKN13-3rd-4Team/main/images/chatbot_example.png" width="500"/>
+
 #### 예시 1: FAQ 질문
 ```
 Input: "반품은 어떻게 하나요?"
@@ -329,6 +313,12 @@ Process: Agent → RAG Tool → Vector Search → FAQ 검색
 Output: "상품 수령 후 7일 이내 고객센터 연락..."
 ```
 
+#### 예시 2: 주문 내역과 배송 상태 질문 (복합 질문)
+```
+Input: "주문한 내역과 지금 배송 상태는 어떻게 되나요?"
+Process: Agent → Order Lookup Tool, Product Search Tool → SQLite 기반 RDB, 스마트택배 API → 주문내역, 배송 상태 조회 
+Output: "주문한 상품은 ..., 현재 택배는... "
+```
 ---
 
 
@@ -352,7 +342,6 @@ Output: "상품 수령 후 7일 이내 고객센터 연락..."
 - **API 호출**: 질문당 1-3회
 
 ## 10. 주요 장점
-## 🎯 주요 장점
 
 1. **단순성**: 하나의 Agent로 모든 질문 처리
 2. **효율성**: Batch 처리로 복합 질문 최적화
@@ -363,7 +352,7 @@ Output: "상품 수령 후 7일 이내 고객센터 연락..."
 
 ---
 
-## 10. 빠른 시작
+## 11. 빠른 시작
 
 ### 1. 환경 설정
 ```bash
