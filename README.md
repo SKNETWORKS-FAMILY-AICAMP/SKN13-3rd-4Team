@@ -258,12 +258,24 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 ### ✅ 저장 방식
 
 - FAQ와 Product 모두 Chroma Vector Store에 저장됩니다:
-    ```python
-    vectorstore = Chroma.from_documents(
-        documents=documents,
-        embedding=embeddings,
-        persist_directory=str(vector_db_path)
-    )
+  ```python
+      # 벡터 스토어 생성
+      self.vector_db_path.mkdir(parents=True, exist_ok=True)
+      self.vectorstore = Chroma(
+          embedding_function=self.embeddings,
+          persist_directory=str(self.vector_db_path)
+      )
+
+      # 문서 추가
+      BATCH_SIZE = 500
+      for i in range(0, len(split_docs), BATCH_SIZE):
+          try:
+              self.vectorstore.add_documents(split_docs[i:i+BATCH_SIZE])
+          except Exception as e:
+              print(f"{i}번 째 Document Batch 추가 실패: {e}")
+              continue
+                  
+      print(f"벡터 스토어 생성 완료: {self.vector_db_path}")
     ```
 - `metadata`는 검색용이 아닌, 결과 출력용으로 활용됨
 
