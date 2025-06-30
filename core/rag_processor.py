@@ -25,7 +25,7 @@ class RAGProcessor:
     def __init__(self, model_name: str = "gpt-4o-mini"):
         self.model_name = model_name
         self.llm = ChatOpenAI(model=model_name, temperature=0.1)
-        self.embeddings = OpenAIEmbeddings()
+        self.embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
         self.vectorstore = None
         self.retriever = None
         self.rag_chain = None
@@ -117,12 +117,20 @@ class RAGProcessor:
         
         # 벡터 스토어 생성
         self.vector_db_path.mkdir(parents=True, exist_ok=True)
-        self.vectorstore = Chroma.from_documents(
-            documents=split_docs,
-            embedding=self.embeddings,
+        self.vectorstore = Chroma(
+            embedding_function=self.embeddings,
             persist_directory=str(self.vector_db_path)
         )
-        
+
+        # 문서 추가
+        BATCH_SIZE = 500
+        for i in range(0, len(split_docs), BATCH_SIZE):
+            try:
+                self.vectorstore.add_documents(split_docs[i:i+BATCH_SIZE])
+            except Exception as e:
+                print(f"{i}번 째 Document Batch 추가 실패: {e}")
+                continue
+                    
         print(f"벡터 스토어 생성 완료: {self.vector_db_path}")
     
     def _load_documents(self) -> List[Document]:
