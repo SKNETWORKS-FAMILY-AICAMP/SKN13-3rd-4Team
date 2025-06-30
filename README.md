@@ -95,29 +95,11 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 ## 6. 시스템 아키텍처
 
 ### 전체 구조도
-```
-┌─────────────────┐      ┌────────────────────┐      ┌─────────────────┐
-│   사용자 질문    │ ───▶ │  Tool Calling Agent │ ───▶ │   응답 생성     │
-└─────────────────┘      └────────────────────┘      └─────────────────┘
-                                │
-                                ▼
-                      ┌────────────────────┐
-                      │     도구 선택       │
-                      │   (자동 Tool 호출)  │
-                      └────────────────────┘
-                                │
-        ┌──────────────┬──────────────┬──────────────┬──────────────┬──────────────┐
-        ▼              ▼              ▼              ▼              ▼
-┌────────────────┐┌────────────────┐┌────────────────────────┐┌────────────────────┐┌────────────────────────────┐
-│ RAG Search Tool ││ Order Lookup   ││ Delivery Tracking Tool││ Product Search Tool││ General Response Tool      │
-│ (FAQ/상품 검색) ││ Tool (주문 조회)││ (배송 상태 조회)       ││ (내 상품 정보 조회) ││ (일반 대화 처리)             │
-└────────────────┘└────────────────┘└────────────────────────┘└────────────────────┘└────────────────────────────┘
-
-```
+<img src="https://raw.githubusercontent.com/SKNETWORKS-FAMILY-AICAMP/SKN13-3rd-4Team/main/images/system_architecture.png" width="700"/>
 
 ###  챗봇 처리 플로우  
 
-<img src="https://raw.githubusercontent.com/SKNETWORKS-FAMILY-AICAMP/SKN13-3rd-4Team/main/images/chatbot.png" width="500"/>
+<img src="https://raw.githubusercontent.com/SKNETWORKS-FAMILY-AICAMP/SKN13-3rd-4Team/main/images/chatbot.png" width="700"/>
 
 
 ※ 사용자의 질문이 실제 응답으로 이어지는 전 과정을 시각화한 흐름도입니다.
