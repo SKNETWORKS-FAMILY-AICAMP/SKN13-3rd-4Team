@@ -5,7 +5,7 @@
 | 항목 | 최성장 | 박현아 | 구재회 | 전진혁 |
 |----|----|----|----|----|
 | 이미지 | <img src="images/키퍼.png" width="100" height="100"> | <img src="images/베써니.png" width="120" height="100"> | <img src="images/이든.png" width="100" height="100"> | <img src="images/아자젤.png" width="100" height="100"> |
-| 이메일 | [GrowingChoi](https://github.com/GrowingChoi) | [hyuna](https://github.com/hyun-ah-0) | [jaehoi-koo](https://github.com/jaehoi-koo) | [master-dev](https://github.com/Jinhyeok33) |
+| 이메일 | [GrowingChocolate](https://github.com/GrowingChoi) | <p align='center'>[hyuna](https://github.com/hyun-ah-0)</p> | <p align='center'>[jaehoi-koo](https://github.com/jaehoi-koo)</p> | <p align='center'>[rag-master](https://github.com/Jinhyeok33)</p> |
 
 ## 1.프로젝트 개요
 
@@ -412,7 +412,7 @@ SKN13-3rd-4Team
 
 | 이름 | 회고 |
 |----|----|
-|최성장 | 4차 프로젝트도 화이팅 |
+|최성장 | 4차 프로젝트도 화이팅 >.< |
 |박현아 | 좋은 팀원들 만나서 무사히 끝낼 수 있었습니다! 다들 너무 감사했고, 다음에 있을 4차 프로젝트도 잘 부탁드려요~ |
 |구재회 | 딸깍 |
 |전진혁 | **"RAG master"** |
