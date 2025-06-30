@@ -203,13 +203,11 @@ class RAGProcessor:
             for product in product_data:
                 # 사양 정보 포맷팅
                 specs = product.get('specifications', {})
-                # specs_text = ", ".join([f"{k}: {v}" for k, v in specs.items()]) if isinstance(specs, dict) else str(specs)
-                specs_text = "\n".join(specs) if isinstance(specs, list) else str(specs)
+                specs_text = ",".join(specs) if isinstance(specs, list) else str(specs)
                 
                 # 특징 정보 포맷팅
                 features = product.get('features', [])
-                # features_text = ", ".join(features) if isinstance(features, list) else str(features)
-                features_text = "\n".join(features) if isinstance(features, list) else str(features)
+                features_text = ",".join(features) if isinstance(features, list) else str(features)
                 
                 doc = Document(
                     page_content=f"상품명: {product['name']}\n카테고리: {product['category']}\n키워드: {product['keywords']}\n설명: {product['description']}\n특징: {features_text}\n가격: {product['price']}원",

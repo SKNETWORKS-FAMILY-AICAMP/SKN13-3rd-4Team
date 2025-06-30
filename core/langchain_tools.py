@@ -22,10 +22,11 @@ class RAGSearchInput(BaseModel):
 class RAGSearchTool(BaseTool):
     """RAG 기반 문서 검색 및 응답 생성 도구"""
     name: str = "rag_search"
-    description: str = """FAQ, 제품 정보, 정책 등에 대한 질문에 답변합니다.
+    description: str = """FAQ, 쇼핑몰 내 판매중인 제품 정보, 정책 등에 대한 질문에 답변합니다.
     다음과 같은 질문에 사용하세요:
     - 배송비, 반품, 교환 등 FAQ 관련 질문
-    - 제품 사양, 가격, 재고 등 제품 정보 질문
+    - 판매중인 제품의 가격, 재고 등 제품 정보 질문
+    - "저렴한", "비슷한", "유사한" 등의 제품 추천
     - 회사 정책, 서비스 안내 등 일반적인 질문"""
     args_schema: type = RAGSearchInput
 
@@ -236,13 +237,13 @@ class ProductSearchInput(BaseModel):
 
 
 class ProductSearchTool(BaseTool):
-    """상품 검색 도구"""
+    """사용자 상품 검색 도구"""
     name: str = "product_search"
-    description: str = """상품을 검색하고 상품 정보를 제공합니다.
+    description: str = """사용자의 상품을 검색하고 해당 정보를 제공합니다.
     다음과 같은 질문에 사용하세요:
-    - 특정 상품 검색
-    - 상품 가격, 재고 확인
-    - 상품 사양 문의"""
+    - 사용자 상품 문의
+    - 사용자 상품 가격, 재고 확인
+    - 사용자가 주문한 상품"""
     args_schema: type = ProductSearchInput
 
     def __init__(self, **kwargs):

@@ -95,7 +95,7 @@ class ToolCallingAgentProcessor:
 - 자연스러운 대화를 통한 문제 해결
 
 사용 가능한 도구들:
-1. rag_search: FAQ, 제품 정보, 정책 등에 대한 질문 답변
+1. rag_search: FAQ, 정책, 쇼핑몰 내 제품 정보 등에 대한 질문 답변
 2. order_lookup: 주문 상태, 주문 내역, 사용자 정보 조회
 3. delivery_tracking: 배송 추적 및 배송 정보 제공
 4. product_search: 사용자의 상품 검색 및 상품 정보 제공
@@ -105,12 +105,11 @@ class ToolCallingAgentProcessor:
 - 자기소개, 이름, 기능 문의 → general_response
 - 인사, 감사 인사, 일반 대화 → general_response
 - 배송비, 반품, 교환 등 FAQ 관련 질문 -> rag_search
-- "셔츠 추천", "유사한 하의", "더 저렴한 제품" 등 특정 제품 관련 문의 → rag_search
-- 제품 사양, 특징 등 제품 정보 → rag_search 이후 product_search
+- "셔츠 추천", "유사한 하의", "더 저렴한 제품" 등 쇼핑몰 내 판매중인 제품 관련 문의 → rag_search
 - 주문 내역, 내 주문, 구매 내역, 주문 상태 → order_lookup
 - 사용자 정보, "내가 누구", "내 정보", "회원 정보", "프로필" → order_lookup
 - 배송 추적, 배송 상태, "내 [상품명] 어디까지왔어?" → delivery_tracking
-- 사용자가 주문한 상품, 가격 확인 → product_search
+- 사용자가 주문한 상품 확인 → product_search
 
 
 응답 가이드라인:
