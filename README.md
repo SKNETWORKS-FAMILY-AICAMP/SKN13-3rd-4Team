@@ -1,5 +1,12 @@
 # Tool Calling Agent 기반 쇼핑몰 챗봇 시스템
 
+## 팀원 소개 
+
+| 항목 | 최성장 | 박현아 | 구재회 | 전진혁 |
+|----|----|----|----|----|
+| 이미지 | <img src="images/키퍼.png" width="100" height="100"> | <img src="images/베써니.png" width="120" height="100"> | <img src="images/이든.png" width="100" height="100"> | <img src="images/아자젤.png" width="100" height="100"> |
+| 이메일 | [성장choi](https://github.com/GrowingChoi) | [](https://github.com/hyun-ah-0) | [](https://github.com/jaehoi-koo) | [master-dev](https://github.com/Jinhyeok33) |
+
 ## 프로젝트 개요
 
 기존 챗봇이 **의도(Intent)** 만 분류하고 정해진 응답만 제공했다면,  
@@ -159,20 +166,28 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
     ```
     질문: {질문 텍스트}
     답변: {답변 텍스트}
+    키워드: {키워드 텍스트}
     ```
 
 - 코드 예시:
     ```python
-    for faq in faq_data:
-        doc = Document(
-            page_content=f"질문: {faq['question']}\n답변: {faq['answer']}",
-            metadata={
-                "source": "faq",
-                "category": faq['category'],
-                "faq_id": faq.get('faq_id', faq.get('id', 'unknown')),
-                "keywords": faq.get('keywords', '')
-            }
-        )
+        for faq in faq_data:
+            # 특징 정보 포맷팅
+            feats = faq.get('features', [])
+            feature_text = "\n".join(feats) if isinstance(feats, list) else str(feats)
+
+            # 키워드 정보 포맷팅
+            keywords = faq.get('keywords', [])
+            keywords_text = ", ".join(keywords) if isinstance(keywords, list) else str(keywords)
+            
+            doc = Document(
+                page_content=f"질문: {faq['question']}\n답변: {faq['answer']}\n키워드: {keywords_text}",
+                metadata={
+                    "source": "faq",
+                    "features": feature_text,
+                    "keywords": keywords_text
+                }
+            )
     ```
 - 텍스트 정제:
     - 개행문자 제거
