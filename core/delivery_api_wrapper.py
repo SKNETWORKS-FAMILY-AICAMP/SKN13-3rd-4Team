@@ -79,7 +79,7 @@ class DeliveryAPIWrapper:
             if response.status_code == 200:
                 data = response.json()
                 
-                if data.get("status") == "true":
+                if data.get("result") == "Y":
                     return self._format_api_response(data)
                 else:
                     print(f"❌ API 오류: {data.get('msg', '알 수 없는 오류')}")
