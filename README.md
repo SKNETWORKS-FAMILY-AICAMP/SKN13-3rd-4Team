@@ -5,9 +5,9 @@
 | 항목 | 최성장 | 박현아 | 구재회 | 전진혁 |
 |----|----|----|----|----|
 | 이미지 | <img src="images/키퍼.png" width="100" height="100"> | <img src="images/베써니.png" width="120" height="100"> | <img src="images/이든.png" width="100" height="100"> | <img src="images/아자젤.png" width="100" height="100"> |
-| 이메일 | [성장choi](https://github.com/GrowingChoi) | [](https://github.com/hyun-ah-0) | [](https://github.com/jaehoi-koo) | [master-dev](https://github.com/Jinhyeok33) |
+| 이메일 | [GrowingChoi](https://github.com/GrowingChoi) | [hyuna](https://github.com/hyun-ah-0) | [jaehoi-koo](https://github.com/jaehoi-koo) | [master-dev](https://github.com/Jinhyeok33) |
 
-## 프로젝트 개요
+## 1.프로젝트 개요
 
 기존 챗봇이 **의도(Intent)** 만 분류하고 정해진 응답만 제공했다면,  
 이 시스템은 **LLM이 직접 판단하고, 필요한 툴을 호출하여 최적의 답변을 생성**합니다.
@@ -405,8 +405,16 @@ streamlit run app/unified_chatbot.py
 - **[GUIDE.md](GUIDE.md)**: 상세한 설치, 사용법, 데이터 관리 및 트러블슈팅 가이드
 - **[docs/](docs/)**: 추가 기술 문서 및 아키텍처 정보
 
-## 라이선스
-MIT License
-
 ## 개발팀
 SKN13-3rd-4Team
+
+## 한 줄 회고
+
+|최성장 |  |
+|----|----|
+|박현아 | 좋은 팀원들 만나서 무사히 끝낼 수 있었습니다! 다들 너무 감사했고, 다음에 있을 4차 프로젝트도 잘 부탁드려요~ |
+|구재회 |  |
+|전진혁 |  |
+
+
+
