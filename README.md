@@ -208,44 +208,52 @@ FAQ에서 원하는 답변을 찾지 못하면 **40% 이상의 고객이 구매�
 - 각 상품 정보를 하나의 문자열로 변환
     - 포함 항목:
         - 상품명
-        - 설명
+        - 카테고리
+        - 키워드
+        - 설명 (descriptions)
         - 사양 (specifications)
         - 특징 (features)
         - 가격
 
 - 사양, 특징은 문자열로 이어붙임:
     ```python
-    specs_text = ", ".join([f"{k}: {v}" for k, v in specs.items()])
-    features_text = ", ".join(features)
+    specs = product.get('specifications', {})
+    specs_text = ",".join(specs) if isinstance(specs, list) else str(specs)
+    features = product.get('features', [])
+    features_text = ",".join(features) if isinstance(features, list) else str(features)
     ```
 
 - 최종적으로 아래와 같이 page_content를 생성:
     ```
-    상품명: 무선 이어폰 Pro
-    설명: 고품질 무선 이어폰으로 노이즈 캔슬링 기능과 긴 배터리 수명을 자랑합니다.
-    사양: 배터리: 최대 24시간, 연결: 블루투스 5.0, 방수: IPX4
-    특징: 노이즈 캔슬링, 터치 컨트롤, 고속 충전
-    가격: 89,000원
+    상품명: 퍼프 소매 오픈워크 카디건 - 네이비,
+    카테고리: 여성 의류 가디건,
+    키워드: 가디건, 여성 가디건, 퍼프 소매, 오픈워크, 네이비, 8 seconds
+    설명: 8 seconds 브랜드의 퍼프 소매 오픈워크 카디건 - 네이비는 세련된 퍼프 소매와 오픈워크 디테일이 돋보이는 여성용 가디건입니다. 네이비 컬러로 다양한 스타일링이 가능하며,
+      S, M, L 세 가지 사이즈로 제공되어 체형에 맞게 선택할 수 있습니다. 봄, 여름 시즌에 가볍게 걸치기 좋은 아이템으로, 깔끔한 디자인과 편안한 착용감이 특징입니다.
+    사양: 브랜드: 8 seconds, 색상: 네이비, 사이즈: S, M, L, 상품할인: -10,000원, 쿠폰할인: -0원, 총 할인금액: -10,000원
+    특징: 퍼프 소매 디자인, 오픈워크 디테일, 깔끔한 네이비 컬러, 봄부터 여름까지 착용 가능, 여성스러운 실루엣
+    가격: 정가 39,900원 / 할인가 29,900원 (25% 할인)
     ```
 
 - 코드 예시:
     ```python
-    doc = Document(
-        page_content=(
-            f"상품명: {product['name']}\n"
-            f"설명: {product['description']}\n"
-            f"사양: {specs_text}\n"
-            f"특징: {features_text}\n"
-            f"가격: {product['price']:,}원"
-        ),
-        metadata={
-            "source": "product",
-            "product_id": product['product_id'],
-            "category": product['category'],
-            "price": product['price'],
-            "keywords": str(product.get('keywords', ''))
-        }
-    )
+        doc = Document(
+            page_content=f"""
+                상품명: {product['name']}
+                카테고리: {product['category']}
+                키워드: {product['keywords']}
+                설명: {product['description']}
+                사양: {specs_text},
+                특징: {features_text}
+                가격: {product['price']}원""",
+            metadata={
+                "source": "product",
+                "product_id": product.get('product_id', ''),
+                "price": product.get('price', 0),
+                "category": product.get('category', '기타'),
+                "keywords": str(product.get('keywords', ''))
+            }
+        )
     ```
 
 ### ✅ Keyword 전처리
